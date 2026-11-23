@@ -39,6 +39,7 @@ ALLOWED_FILES = {
     "model.safetensors.index.json",
     "labels.json",
     "release_evidence.json",
+    "filtered_training_paraphrases.jsonl",
 }
 SECRET = re.compile(r"hf_[A-Za-z0-9]{20,}|sk-(?:proj-|svcacct-)?[A-Za-z0-9_-]{20,}")
 
@@ -185,6 +186,11 @@ def model_card(evidence: dict, adapter: bool) -> str:
         "gold label; verification uses training-only retrieval excluding the source ID. "
         "Exact duplicate and validation/test overlap checks are applied. "
         "Teacher agreement is not human verification.",
+        "",
+        "Frozen augmentation is included as filtered_training_paraphrases.jsonl, licensed "
+        "CC BY 4.0 with the Banking77 attribution. After preparing the pinned official split, "
+        "use this file as data/distilled.jsonl to reproduce training without regenerating "
+        "stochastic teacher rewrites. Its fingerprint is recorded in release_evidence.json.",
         "",
         f"Scope: {evidence['teacher_config'].get('study_scope', 'full')}. Teacher rewrites cover "
         f"{len(evidence['teacher_progress']['completed_sources'])} intent-balanced training sources. "
@@ -360,6 +366,10 @@ def publish(root: Path, token: str) -> dict:
         (folder / "README.md").write_text(model_card(evidence, adapter=kind == "adapter"))
         (folder / "labels.json").write_text(json.dumps(evidence["labels"]) + "\n")
         (folder / "release_evidence.json").write_text(json.dumps(evidence, indent=2) + "\n")
+        frozen_data = folder / "filtered_training_paraphrases.jsonl"
+        frozen_data.write_bytes((root / "data/distilled.jsonl").read_bytes())
+        if digest(read_rows(frozen_data)) != evidence["distilled_sha256"]:
+            raise ValueError("Frozen public augmentation data differs from the evaluated training data")
         prepared[kind] = inventory(folder)
     api = HfApi(token=token)
     if api.whoami()["name"].casefold() != NAMESPACE.casefold():
