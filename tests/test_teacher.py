@@ -39,3 +39,41 @@ def test_choice_contract_and_query_redaction():
     label, usage = teacher.label("Email jane@example.com about my card")
     teacher.client.close()
     assert label == teacher.labels[0] and usage["prompt_tokens"] == 10
+
+
+def test_parallel_filter_commits_in_order_and_resumes(tmp_path, monkeypatch):
+    from b77 import teacher as module
+    from b77.data import read_rows, write_rows
+
+    monkeypatch.chdir(tmp_path)
+    folder = tmp_path / "data/prepared"
+    folder.mkdir(parents=True)
+    (tmp_path / "data/labels.json").write_text(json.dumps(["card_arrival"]))
+    train = [{"id": f"train-{i}", "text": f"source {i}", "label": 0} for i in range(3)]
+    write_rows(folder / "train.jsonl", train)
+    write_rows(folder / "validation.jsonl", [{"id": "val", "text": "validation query", "label": 0}])
+    write_rows(folder / "test.jsonl", [{"id": "test", "text": "test query", "label": 0}])
+    calls = []
+
+    class FakeTeacher:
+        config = {"revision": "fixture"}
+        labels = ["card_arrival"]
+
+        def __init__(self):
+            self.client = httpx.Client()
+
+        def paraphrases(self, text):
+            calls.append(text)
+            return [text + " paraphrase", "shared paraphrase", "validation query"]
+
+        def label(self, text, temperature, seed):
+            return "card_arrival", {}
+
+    monkeypatch.setattr(module, "Teacher", FakeTeacher)
+    result = module.distill(workers=2)
+    rows = read_rows(tmp_path / "data/distilled.jsonl")
+    assert result["completed_sources"] == [row["id"] for row in train]
+    assert result["proposed"] == 9 and result["unique_kept"] == 4
+    assert [row["source_id"] for row in rows] == ["train-0", "train-0", "train-1", "train-2"]
+    assert module.distill(workers=2) == result
+    assert len(calls) == 3

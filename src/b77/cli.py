@@ -16,6 +16,7 @@ def main() -> None:
     score.add_argument("--final-test", action="store_true")
     distillation = commands.add_parser("distill")
     distillation.add_argument("--limit", type=int)
+    distillation.add_argument("--workers", type=int, default=1)
     student = commands.add_parser("train-student")
     student.add_argument("config", type=Path)
     student.add_argument("--seed", type=int, required=True)
@@ -48,7 +49,7 @@ def main() -> None:
     elif args.command == "distill":
         from .teacher import distill
 
-        result = distill(args.limit)
+        result = distill(args.limit, args.workers)
     elif args.command == "train-student":
         from .train_student import train as train_lora
 

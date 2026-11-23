@@ -2,6 +2,7 @@
 
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import httpx
@@ -105,7 +106,9 @@ class Retriever:
         return [self.rows[index] for index in np.argsort(-scores, kind="stable")[:k]]
 
 
-def distill(limit: int | None = None) -> dict:
+def distill(limit: int | None = None, workers: int = 1) -> dict:
+    if not 1 <= workers <= 16:
+        raise ValueError("Use between 1 and 16 teacher workers")
     teacher = Teacher()
     train = read_rows(Path("data/prepared/train.jsonl"))
     excluded = read_rows(Path("data/prepared/validation.jsonl")) + read_rows(
@@ -127,12 +130,21 @@ def distill(limit: int | None = None) -> dict:
         raise ValueError("Distillation inputs changed; use a clean run directory")
     metadata["identity"] = identity
     seen = {normalize(mask(row["text"])) for row in train + excluded + kept}
-    for row in train[:limit] if limit else train:
-        if row["id"] in metadata["completed_sources"]:
-            continue
-        for text in teacher.paraphrases(row["text"]):
+    pending = [
+        row
+        for row in (train[:limit] if limit else train)
+        if row["id"] not in metadata["completed_sources"]
+    ]
+
+    def generate(row):
+        return [
+            (text, [teacher.label(text, 0.7, seed)[0] for seed in [17, 42, 73]])
+            for text in teacher.paraphrases(row["text"])
+        ]
+
+    def save_source(row, generated):
+        for text, votes in generated:
             metadata["proposed"] += 1
-            votes = [teacher.label(text, 0.7, seed)[0] for seed in [17, 42, 73]]
             agreed = len(set(votes)) == 1 and votes[0] == teacher.labels[row["label"]]
             metadata["all_votes_matched"] += int(agreed)
             key = normalize(mask(text))
@@ -155,6 +167,17 @@ def distill(limit: int | None = None) -> dict:
         write_rows(path, kept)
         progress.parent.mkdir(exist_ok=True)
         progress.write_text(json.dumps(metadata, indent=2) + "\n")
+
+    # Bound outstanding requests; commit results in source order for stable deduplication.
+    try:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            for offset in range(0, len(pending), workers):
+                batch = pending[offset : offset + workers]
+                results = list(pool.map(generate, batch))
+                for row, generated in zip(batch, results, strict=True):
+                    save_source(row, generated)
+    finally:
+        teacher.client.close()
     return {**metadata, "source_ids_verified": all(row["source_id"] in source for row in kept)}
 
 
