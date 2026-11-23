@@ -11,6 +11,31 @@ import pytest
 from b77 import backup
 
 
+def test_download_cache_resolution_rejects_outside_files(tmp_path):
+    cache = tmp_path / "cache"
+    cache.mkdir()
+    blob = cache / "blob"
+    blob.write_bytes(b"downloaded fixture")
+    assert backup.downloaded_file(blob, cache) == blob.resolve()
+    outside = tmp_path / "outside"
+    outside.write_bytes(b"outside")
+    with pytest.raises(ValueError, match="escapes"):
+        backup.downloaded_file(outside, cache)
+
+
+def test_hub_snapshot_symlink_can_resolve_only_to_its_cache(tmp_path):
+    cache = tmp_path / "cache"
+    cache.mkdir()
+    blob = cache / "blob"
+    blob.write_bytes(b"downloaded fixture")
+    link = cache / "snapshot.zip"
+    try:
+        link.symlink_to(blob)
+    except OSError:
+        pytest.skip("Creating symlinks needs privileges on this Windows host")
+    assert backup.downloaded_file(link, cache) == blob.resolve()
+
+
 def test_archive_rejects_traversal_and_credentials(tmp_path):
     for index, (name, content) in enumerate(
         [

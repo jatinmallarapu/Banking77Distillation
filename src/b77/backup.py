@@ -20,6 +20,14 @@ SECRET = re.compile(rb"hf_[A-Za-z0-9]{20,}|sk-(?:proj-|svcacct-)?[A-Za-z0-9_-]{2
 TEXT = {".py", ".json", ".jsonl", ".yaml", ".yml", ".md", ".toml", ".txt", ".jinja"}
 
 
+def downloaded_file(path: Path, cache: Path) -> Path:
+    """Hub snapshots link to cache blobs; resolve only within this owned download cache."""
+    resolved = path.resolve(strict=True)
+    if not resolved.is_relative_to(cache.resolve()) or not resolved.is_file():
+        raise ValueError("Downloaded checkpoint escapes the verification cache")
+    return resolved
+
+
 def check_archive(path: Path) -> None:
     """Inspect text for credentials and reject traversal or symlinks before upload or extraction."""
     with zipfile.ZipFile(path) as archive:
@@ -92,7 +100,7 @@ def upload(root: Path, token: str) -> dict:
             cache_dir=temporary / "verification",
             force_download=True,
         )
-        if file_fingerprint(Path(downloaded)) != checksum:
+        if file_fingerprint(downloaded_file(Path(downloaded), temporary / "verification")) != checksum:
             raise ValueError("Private checkpoint download failed SHA256 verification")
     receipt = {
         "status": "verified_private_backup",
@@ -127,6 +135,7 @@ def restore(destination: Path, token: str) -> dict:
                 force_download=True,
             )
         )
+        archive = downloaded_file(archive, folder)
         if file_fingerprint(archive) != manifest["archive_sha256"]:
             raise ValueError("Restore archive checksum mismatch")
         check_archive(archive)
