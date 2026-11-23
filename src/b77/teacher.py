@@ -26,7 +26,7 @@ class Teacher:
                 if os.getenv("TEACHER_API_KEY")
                 else {}
             ),
-            timeout=120,
+            timeout=httpx.Timeout(600, connect=20),
         )
 
     def chat(self, messages: list[dict], temperature: float = 0, seed: int = 42, **extra) -> dict:

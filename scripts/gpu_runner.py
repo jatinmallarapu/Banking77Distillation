@@ -35,6 +35,8 @@ def main() -> None:
         raise RuntimeError(
             "Use an existing Linux CUDA GPU with at least 14 GiB; nothing was started"
         )
+    if args.stage == "evaluate":
+        subprocess.run([sys.executable, "scripts/verify_decoder.py"], check=True)
     command("prepare")
     Path("runs").mkdir(exist_ok=True)
     teacher = yaml.safe_load(Path("configs/teacher.yaml").read_text())
