@@ -8,10 +8,11 @@ import yaml
 from .data import digest, read_rows
 from .guardrails import mask
 from .prompts import student_messages
+from .repro import checked_training_resume
 from .teacher import validate_distilled
 
 
-def train(config_path: Path, seed: int, smoke: bool = False) -> dict:
+def train(config_path: Path, seed: int, smoke: bool = False, resume: bool = False) -> dict:
     import torch
     from datasets import Dataset
     from peft import LoraConfig
@@ -35,6 +36,23 @@ def train(config_path: Path, seed: int, smoke: bool = False) -> dict:
             raise ValueError("Student B requires nonempty filtered teacher data")
         train_rows = train_rows + augmented
     labels = json.loads(Path("data/labels.json").read_text())
+    out = Path("checkpoints") / config["name"] / str(seed)
+    if smoke:
+        out = Path("checkpoints/smoke") / config["name"] / str(seed)
+    input_manifest = {
+        "config": config,
+        "seed": seed,
+        "smoke": smoke,
+        "train_sha256": digest(train_rows),
+        "validation_sha256": digest(validation),
+        "labels_sha256": digest(labels),
+    }
+    resume_checkpoint = checked_training_resume(out, input_manifest) if resume else None
+    out.mkdir(parents=True, exist_ok=True)
+    lock = out / "input_manifest.json"
+    if lock.exists() and json.loads(lock.read_text()) != input_manifest:
+        raise ValueError("Training inputs changed; use a separate output directory")
+    lock.write_text(json.dumps(input_manifest, indent=2) + "\n")
     tokenizer = AutoTokenizer.from_pretrained(config["base_model"], revision=config["revision"])
     tokenizer.pad_token = tokenizer.eos_token
     truncated = {"examples": 0}
@@ -71,7 +89,6 @@ def train(config_path: Path, seed: int, smoke: bool = False) -> dict:
         attn_implementation="sdpa",
     )
     model.config.use_cache = False
-    out = Path("checkpoints") / config["name"] / str(seed)
     args = SFTConfig(
         output_dir=str(out),
         num_train_epochs=config["epochs"],
@@ -111,7 +128,7 @@ def train(config_path: Path, seed: int, smoke: bool = False) -> dict:
             task_type="CAUSAL_LM",
         ),
     )
-    trainer.train()
+    trainer.train(resume_from_checkpoint=resume_checkpoint)
     trainer.save_model(str(out / "adapter"))
     tokenizer.save_pretrained(out / "adapter")
     manifest = {

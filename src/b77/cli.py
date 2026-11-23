@@ -22,6 +22,7 @@ def main() -> None:
     student.add_argument("config", type=Path)
     student.add_argument("--seed", type=int, required=True)
     student.add_argument("--smoke", action="store_true")
+    student.add_argument("--resume", action="store_true")
     gpu = commands.add_parser("evaluate-gpu")
     gpu.add_argument("--system", required=True)
     gpu.add_argument("--adapter", type=Path)
@@ -54,7 +55,7 @@ def main() -> None:
     elif args.command == "train-student":
         from .train_student import train as train_lora
 
-        result = train_lora(args.config, args.seed, args.smoke)
+        result = train_lora(args.config, args.seed, args.smoke, args.resume)
     else:
         from .evaluate import gpu_evaluate
 

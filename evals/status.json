@@ -4,14 +4,14 @@
   "teacher_few_shot": "not_run",
   "teacher_distillation_keep_rate": null,
   "student_a_seeds": {
-    "1": "training_in_progress",
-    "2": "queued",
-    "3": "queued"
+    "1": "trained_evaluation_pending",
+    "2": "training_in_progress",
+    "3": "waiting_for_teacher_gpu_capacity"
   },
   "student_b_seeds": {
-    "1": "pending_teacher_pilot",
-    "2": "pending_teacher_pilot",
-    "3": "pending_teacher_pilot"
+    "1": "pending_full_teacher_generation",
+    "2": "pending_full_teacher_generation",
+    "3": "pending_full_teacher_generation"
   },
   "gpu_latency_cost_comparisons": "not_measured",
   "hugging_face_publication": "authorized_pending_complete_training_and_evaluation",
@@ -24,5 +24,8 @@
     "proposed": 600,
     "unique_kept": 478,
     "keep_rate": 0.7966666666666666
-  }
+  },
+  "hugging_face_namespace": "JatinMallarapu",
+  "hugging_face_authentication": "verified_without_logging_credentials",
+  "status_note": "Checkpoint snapshot, not a live progress feed. All final GPU test metrics and the public model release remain pending."
 }

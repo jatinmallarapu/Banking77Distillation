@@ -5,23 +5,23 @@
 [![Data: CC BY 4.0](https://img.shields.io/badge/data-CC_BY_4.0-146d7f.svg)](ATTRIBUTION.md)
 
 **When is prompting not enough?** A reproducible experiment for comparing prompting,
-fine-tuning and distillation in customer-intent routing—starting with a measured
+fine-tuning and distillation in customer-intent routingâ€”starting with a measured
 CPU reference and recording GPU execution status explicitly.
 
 ## Results and execution status
 
 The TF-IDF/logistic model was actually trained and evaluated on all **3,080 official
-test queries**. A real T4 GPU smoke passed, Student A training is underway, and a
+test queries**. A real T4 GPU smoke passed, Student A seed 1 finished full training, and a
 versioned 200-source teacher pilot completed; full generation has resumed. No completed Qwen comparison or
 Hugging Face release is claimed. See the [teacher investigation](docs/TEACHER_AUDIT.md).
 
 | System | Status | Test accuracy, 95% CI | Test macro-F1, 95% CI |
 | --- | --- | --- | --- |
 | TF-IDF + logistic regression | **Measured, CPU** | **88.67% [87.61, 89.81]** | **88.71% [87.62, 89.85]** |
-| Zero-shot Qwen2.5-7B AWQ | Runner implemented; unrun | — | — |
-| Retrieval few-shot Qwen2.5-7B AWQ | Runner implemented; unrun | — | — |
-| Student A · gold only, three seeds | Training/evaluation code; unrun | — | — |
-| Student B · gold + distilled, three seeds | Training/evaluation code; unrun | — | — |
+| Zero-shot Qwen2.5-7B AWQ | Runner implemented; unrun | â€” | â€” |
+| Retrieval few-shot Qwen2.5-7B AWQ | Runner implemented; unrun | â€” | â€” |
+| Student A Â· gold only, three seeds | Training/evaluation code; unrun | â€” | â€” |
+| Student B Â· gold + distilled, three seeds | Training/evaluation code; unrun | â€” | â€” |
 
 **Teacher-data pilot:** retained **478/600 paraphrases (79.67%)** from 200 training
 queries covering all 77 intents, in **21.79 minutes** on one T4. Three seeded votes
@@ -61,14 +61,14 @@ decision must wait for the predeclared GPU runs.
 
 ```mermaid
 flowchart LR
-  D[Banking77 · pinned Parquet revision] --> S[Deduplicate + stratified train / validation]
+  D[Banking77 Â· pinned Parquet revision] --> S[Deduplicate + stratified train / validation]
   S --> B[Measured TF-IDF reference]
-  S --> T[Qwen 7B · training-only paraphrases]
+  S --> T[Qwen 7B Â· training-only paraphrases]
   T --> F[Three votes agree with source gold + leakage filter]
-  S --> A[Student A · gold only]
-  F --> C[Student B · gold + distilled]
+  S --> A[Student A Â· gold only]
+  F --> C[Student B Â· gold + distilled]
   A & C --> V[Validation checkpoint / temperature / abstention]
-  B & V --> E[Fixed test · quality / calibration / latency / cost]
+  B & V --> E[Fixed test Â· quality / calibration / latency / cost]
   E --> G[300-case CI gate + live consistency check]
   B --> API[FastAPI CPU /classify service]
   C -. future, not published .-> H[Local merged weights / adapter / model card]
@@ -132,8 +132,7 @@ python scripts/gpu_runner.py smoke
 Then follow [GPU_RUNBOOK.md](docs/GPU_RUNBOOK.md) for teacher filtering, full
 students, matched batch-1/batch-32 evaluation and local release preparation.
 [The notebook](notebooks/free_gpu_runner.ipynb) is only a launcher; source code owns
-the logic. The pinned training stack and CUDA behavior still require that actual
-GPU smoke run. A two-step smoke checkpoint cannot pass the release readiness check.
+the logic. The pinned training stack passed the actual T4 GPU smoke run. A two-step smoke checkpoint cannot pass the release readiness check.
 
 - Student base: Qwen2.5-0.5B-Instruct, pinned revision, Apache 2.0.
 - Teacher: Qwen2.5-7B-Instruct-AWQ, pinned revision, Apache 2.0.
@@ -158,7 +157,7 @@ labels, not wrong allowed labels or injection success.
 
 The 50 authored injection pairs cross five clean prompts with ten override
 wrappers. Their measured paired-change rate is a narrow regression result, not a
-claim of comprehensive security. [Attack pairs](evals/injection_set.jsonl) ·
+claim of comprehensive security. [Attack pairs](evals/injection_set.jsonl) Â·
 [Measured outcomes](evals/results/tfidf-injections.json)
 
 Every PR rebuilds the baseline and scores the gate. CI blocks a macro-F1 decline
@@ -174,7 +173,7 @@ uploads never run in CI. Baseline changes must be reviewed separately.
 | 100 users | 902 | 0 | 112.2 | 110 / 340 ms |
 
 These are short ten-second, loopback tests with think time, a ramp and shared
-client/server CPU—not sustained capacity benchmarks. [Raw CSV and configuration](benchmarks/results.json).
+client/server CPUâ€”not sustained capacity benchmarks. [Raw CSV and configuration](benchmarks/results.json).
 The Locust file adapts the request pattern from LanguageModelInferenceBenchmark.
 
 ## Model release status
