@@ -1,8 +1,11 @@
 # Existing free-GPU runner
 
-**Authorization:** prepare only. No GPU was rented, no cloud instance was created,
-and no Hugging Face upload is enabled. The local MX550 has 2 GB VRAM. The teacher,
-six LoRA runs, keep rate, GPU latency/cost comparisons and Qwen release are unrun.
+**Execution status (November 22, 2026):** the owner authorized an existing free
+Kaggle GPU session and publication after verified training and evaluation. No paid
+compute is authorized. Two Tesla T4 GPUs were allocated; the two-step Student A
+smoke completed successfully on Python 3.11.18. Full Student A training has started.
+The smoke adapter is not releaseable. Teacher execution, full comparisons and
+public Hugging Face weights are still pending; no release claim is justified.
 
 Use an existing Linux CUDA session with at least 14 GiB available VRAM, such as a
 free T4 session where available. Quotas, availability and session limits vary;
@@ -22,8 +25,10 @@ an unrelated production project. Exact direct versions are in `pyproject.toml`:
 Transformers 4.51.3, PEFT 0.15.2, TRL 0.17.0, datasets 3.6.0, torch 2.6.0 and vLLM
 0.8.5.post1. The pinned vLLM uses `guided_choice`, not the latest API spelling.
 The training API follows [TRL 0.17 documentation](https://huggingface.co/docs/trl/v0.17.0/sft_trainer).
-Direct dependency metadata was checked for compatibility; an actual GPU smoke
-run has not yet validated CUDA, AWQ or trainer behavior in your notebook image.
+The Student A GPU smoke validated CUDA and trainer behavior. AWQ teacher serving
+and full evaluation require separate checks. Kaggle defaulted to Python 3.13, so
+a dedicated Python 3.11 environment was necessary. The teacher extra includes
+setuptools because Triton imports it at runtime in a fresh environment.
 
 ```sh
 python -m pip install -e '.[train,teacher,dev]'

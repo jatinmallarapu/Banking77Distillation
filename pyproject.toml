@@ -14,7 +14,7 @@ dependencies = ["numpy==2.2.6", "scipy==1.15.3", "scikit-learn==1.6.1", "fastapi
 [project.optional-dependencies]
 train = ["torch==2.6.0", "transformers==4.51.3", "peft==0.15.2", "trl==0.17.0",
  "datasets==3.6.0", "accelerate==1.7.0", "safetensors==0.5.3"]
-teacher = ["vllm==0.8.5.post1; sys_platform == 'linux'"]
+teacher = ["vllm==0.8.5.post1; sys_platform == 'linux'", "setuptools==80.9.0", "wheel==0.45.1"]
 dev = ["pytest==8.3.5", "pytest-cov==6.1.1", "ruff==0.11.11", "mypy==1.15.0", "types-PyYAML==6.0.12.20250516"]
 load = ["locust==2.37.4"]
 
