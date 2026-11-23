@@ -258,6 +258,8 @@ def model_card(evidence: dict, adapter: bool) -> str:
         "## Guardrails and limitations",
         "",
         "Abstention thresholds and temperature scaling are chosen on validation data only. "
+        "Temperature scaling applies to the LLMs; the TF-IDF reference uses raw logistic "
+        "probabilities. ECE differences therefore also reflect calibration procedures. "
         "Finite-label scoring is required for guaranteed label validity; free generation "
         "can still produce invalid text. PII regex masking is partial protection, not "
         "a privacy guarantee. No student-specific prompt-injection success rate is claimed "

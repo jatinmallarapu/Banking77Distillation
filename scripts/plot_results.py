@@ -120,7 +120,7 @@ def render(results: Path, output: Path) -> None:
     reliability.text(
         0.12,
         0.04,
-        "Ten fixed confidence bins; empty bins omitted. Calibration fitted on validation only.",
+        "LLM temperatures use validation only; TF-IDF probabilities are raw. Empty bins omitted.",
         fontsize=9,
     )
     for extension in ["png", "svg"]:
