@@ -233,10 +233,12 @@ class Pipeline:
                 time.sleep(1)
         raise TimeoutError("Teacher server readiness timeout")
 
-    def evaluate_teacher(self, device: int = 1, systems: tuple = ("zeroshot", "fewshot")):
+    def evaluate_teacher(
+        self, device: int = 1, systems: tuple = ("zeroshot", "fewshot"), batches: tuple = (1, 32)
+    ):
         try:
             for system in systems:
-                for batch in [1, 32]:
+                for batch in batches:
                     path = self.root / f"evals/results/{system}-batch{batch}.json"
                     if path.exists() and json.loads(path.read_text()).get("status") == "measured":
                         continue

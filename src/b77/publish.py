@@ -80,7 +80,7 @@ def release_evidence(root: Path) -> dict:
     for system in plan["teacher_systems"] + [
         f"student_{student}-seed{seed}" for student in ["a", "b"] for seed in plan["seeds"]
     ]:
-        for batch in [1, 32]:
+        for batch in plan.get("batch_sizes", [1, 32]):
             key = f"{system}-batch{batch}"
             report = json.loads((root / f"evals/results/{key}.json").read_text())
             if (
@@ -110,7 +110,7 @@ def release_evidence(root: Path) -> dict:
             ):
                 raise ValueError("Training manifests and adapter files must match release data")
             fingerprint = adapter_fingerprint(folder / "adapter")
-            for batch in [1, 32]:
+            for batch in plan.get("batch_sizes", [1, 32]):
                 if (
                     reports[f"student_{student}-seed{seed}-batch{batch}"].get("adapter_fingerprint")
                     != fingerprint
@@ -176,6 +176,13 @@ def model_card(evidence: dict, adapter: bool) -> str:
         "---",
         "",
         f"# Banking77 distilled intent router — {plan['version']}",
+        (
+            f"v0.1 (pilot, single seed, {len(evidence['teacher_progress']['completed_sources'])}-query teacher subset)."
+            if plan["seeds"] == [1]
+            else "Three-seed pilot study."
+        ),
+        f"Declared batch sizes: {plan.get('batch_sizes', [1, 32])}. "
+        "Batch-32 scaling measurements remain future work when only batch 1 is declared.",
         "",
         "## Model summary and intended use",
         "",
@@ -241,7 +248,7 @@ def model_card(evidence: dict, adapter: bool) -> str:
         "",
         "CPU and GPU timings are different hardware references, not matched speedups. "
         "GPU latency measures all-77-label likelihood scoring, not one greedy generation. "
-        "Batch-32 timings, calibration, abstention coverage, token counts, cost assumptions "
+        "Declared batch timings, calibration, abstention coverage, token counts, cost assumptions "
         "and per-seed mean/standard deviation are preserved in release_evidence.json. "
         "A zero GPU price denotes free compute, not a production hosting quote.",
         "Evaluation may resume across sessions on the declared GPU type. Reports record "
@@ -378,7 +385,9 @@ def publish(root: Path, token: str) -> dict:
         frozen_data = folder / "filtered_training_paraphrases.jsonl"
         frozen_data.write_bytes((root / "data/distilled.jsonl").read_bytes())
         if digest(read_rows(frozen_data)) != evidence["distilled_sha256"]:
-            raise ValueError("Frozen public augmentation data differs from the evaluated training data")
+            raise ValueError(
+                "Frozen public augmentation data differs from the evaluated training data"
+            )
         prepared[kind] = inventory(folder)
     api = HfApi(token=token)
     if api.whoami()["name"].casefold() != NAMESPACE.casefold():

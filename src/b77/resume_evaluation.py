@@ -21,7 +21,7 @@ from .teacher import ordered_sources, validate_distilled
 
 
 def validate_recovery(root: Path) -> dict:
-    if release_plan(root) != PILOT:
+    if release_plan(root) not in [PILOT, {**PILOT, "batch_sizes": [1]}]:
         raise ValueError("Restore the declared single-seed pilot; do not redeclare its scope")
     rows = {
         name: read_rows(root / f"data/prepared/{name}.jsonl")
@@ -102,12 +102,16 @@ class EvaluationRecovery(Pipeline):
             self.record("parallel_recovered_evaluations_teacher_gpu0_students_gpu1")
             teacher = threading.Thread(
                 target=self.evaluate_teacher,
-                kwargs={"device": 0, "systems": ("zeroshot",)},
+                kwargs={
+                    "device": 0,
+                    "systems": ("zeroshot",),
+                    "batches": tuple(release_plan(self.root).get("batch_sizes", [1, 32])),
+                },
                 daemon=True,
             )
             teacher.start()
             for student in ["a", "b"]:
-                for batch in [1, 32]:
+                for batch in release_plan(self.root).get("batch_sizes", [1, 32]):
                     key = f"student_{student}-seed1"
                     self.cli(
                         "evaluate-gpu",

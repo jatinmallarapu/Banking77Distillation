@@ -8,8 +8,8 @@ keep the recovered single-seed configs and frozen data intact.
 The runner validates the 200-source teacher identity, three-vote provenance,
 training/validation hashes, completed manifests and both adapter fingerprints.
 It verifies a private backup before work, then evaluates the teacher on GPU 0
-and students on GPU 1. Every system still uses all 3,080 test queries, and both
-declared batch sizes. Validation alone selects temperature and abstention threshold.
+and students on GPU 1. Every system still uses all 3,080 test queries. The explicit
+v0.1 release plan declares batch 1; batch-32 scaling is future work. Validation alone selects temperature and abstention threshold.
 
 Raw numeric scores, measured batch latency, token counts and a random measurement
 session ID are saved under `evals/results/progress/`. No query text or credentials

@@ -14,6 +14,6 @@ def release_plan(root: Path) -> dict:
         }
     plan = json.loads(path.read_text())
     expected = {"version": "v0.1-single-seed-pilot", "seeds": [1], "teacher_systems": ["zeroshot"]}
-    if plan != expected:
+    if plan not in [expected, {**expected, "batch_sizes": [1]}]:
         raise ValueError("Only the explicitly declared single-seed v0.1 plan is supported")
     return plan

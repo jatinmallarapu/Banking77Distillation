@@ -135,6 +135,32 @@ def test_complete_matching_evidence_passes_selection(evidence_files):
     assert len(result["reports"]) == 16
 
 
+def test_batch1_pilot_is_explicit_and_still_requires_the_full_test(evidence_files):
+    for path in (evidence_files / "evals/results").glob("*-batch32.json"):
+        path.unlink()
+    with pytest.raises(FileNotFoundError):
+        release_evidence(evidence_files)
+    put(
+        evidence_files,
+        "configs/release_plan.json",
+        {
+            "version": "v0.1-single-seed-pilot",
+            "seeds": [1],
+            "teacher_systems": ["zeroshot"],
+            "batch_sizes": [1],
+        },
+    )
+    result = release_evidence(evidence_files)
+    assert len(result["reports"]) == 3
+    assert result["selection"]["summary"]["a"]["accuracy_std"] is None
+    path = evidence_files / "evals/results/zeroshot-batch1.json"
+    report = json.loads(path.read_text())
+    report["cases"] = 200
+    path.write_text(json.dumps(report))
+    with pytest.raises(ValueError, match="Incomplete or mismatched"):
+        release_evidence(evidence_files)
+
+
 def test_modified_adapter_invalidates_its_eval(evidence_files):
     (evidence_files / "checkpoints/student_b/1/adapter/adapter_model.safetensors").write_bytes(
         b"changed fixture"

@@ -15,7 +15,7 @@ queries**. **The public distilled model is not released yet.** The first release
 now uses an intent-balanced **200-query teacher subset**, the full **8,992-query
 gold training split**, and **one seed per student for v0.1**. The free Colab fallback
 runs sequentially on one GPU. The original three-seed Kaggle study remains available;
-additional seeds, few-shot comparison and the larger all-source study remain future work
+additional seeds, batch-32 scaling, few-shot comparison and the larger all-source study remain future work
 for the reduced v0.1 release. No GPU results below are implied by runner availability.
 
 [Open the single-GPU Colab runner](https://colab.research.google.com/github/jatinmallarapu/Banking77Distillation/blob/main/notebooks/colab_single_gpu_pilot.ipynb)
