@@ -1,0 +1,21 @@
+{
+  "scope": "training_validation_only_not_heldout_test_results",
+  "status": "two_student_a_seeds_trained_other_runs_pending",
+  "hardware": "Tesla T4",
+  "runs": [
+    {
+      "student": "a",
+      "seed": 1,
+      "best_validation_loss": 0.05590859800577164,
+      "manifest": "checkpoints/student_a/1/training_manifest.json"
+    },
+    {
+      "student": "a",
+      "seed": 2,
+      "best_validation_loss": 0.05248372629284859,
+      "manifest": "checkpoints/student_a/2/training_manifest.json"
+    }
+  ],
+  "heldout_accuracy": null,
+  "distilled_weights_published": false
+}

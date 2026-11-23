@@ -11,7 +11,7 @@ CPU reference and recording GPU execution status explicitly.
 ## Results and execution status
 
 The TF-IDF/logistic model was actually trained and evaluated on all **3,080 official
-test queries**. A real T4 GPU smoke passed, Student A seed 1 finished full training, and a
+test queries**. A real T4 GPU smoke passed, Student A seeds 1 and 2 finished full training, and a
 versioned 200-source teacher pilot completed; full generation has resumed. No completed Qwen comparison or
 Hugging Face release is claimed. See the [teacher investigation](docs/TEACHER_AUDIT.md).
 
@@ -20,7 +20,7 @@ Hugging Face release is claimed. See the [teacher investigation](docs/TEACHER_AU
 | TF-IDF + logistic regression | **Measured, CPU** | **88.67% [87.61, 89.81]** | **88.71% [87.62, 89.85]** |
 | Zero-shot Qwen2.5-7B AWQ | Runner implemented; unrun | â€” | â€” |
 | Retrieval few-shot Qwen2.5-7B AWQ | Runner implemented; unrun | â€” | â€” |
-| Student A Â· gold only, three seeds | Training/evaluation code; unrun | â€” | â€” |
+| Student A Â· gold only, three seeds | Two seeds trained; seed 3 and evaluation pending | â€” | â€” |
 | Student B Â· gold + distilled, three seeds | Training/evaluation code; unrun | â€” | â€” |
 
 **Teacher-data pilot:** retained **478/600 paraphrases (79.67%)** from 200 training
