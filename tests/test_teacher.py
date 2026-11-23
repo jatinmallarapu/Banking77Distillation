@@ -79,3 +79,9 @@ def test_parallel_filter_commits_in_order_and_resumes(tmp_path, monkeypatch):
     assert [row["source_id"] for row in rows] == ["train-0", "train-0", "train-1", "train-2"]
     assert module.distill(workers=2) == result
     assert len(calls) == 3
+    # A torn derived file must be repaired from the joint rows-and-counters checkpoint.
+    (tmp_path / "data/distilled.jsonl").write_text("")
+    (tmp_path / "runs/distill-progress.json").write_text("{}")
+    assert module.distill(workers=2) == result
+    assert len(calls) == 3
+    assert read_rows(tmp_path / "data/distilled.jsonl") == rows

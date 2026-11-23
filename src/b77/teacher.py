@@ -118,8 +118,8 @@ class Retriever:
 
 
 def distill(limit: int | None = None, workers: int = 1) -> dict:
-    if not 1 <= workers <= 16:
-        raise ValueError("Use between 1 and 16 teacher workers")
+    if not 1 <= workers <= 64:
+        raise ValueError("Use between 1 and 64 teacher workers")
     teacher = Teacher()
     train = read_rows(Path("data/prepared/train.jsonl"))
     excluded = read_rows(Path("data/prepared/validation.jsonl")) + read_rows(
@@ -134,6 +134,10 @@ def distill(limit: int | None = None, workers: int = 1) -> dict:
         if progress.exists()
         else {"completed_sources": [], "proposed": 0, "all_votes_matched": 0, "unique_kept": 0}
     )
+    snapshot = Path("runs/distill-checkpoint.json")
+    if snapshot.exists():
+        saved = json.loads(snapshot.read_text())
+        kept, metadata = saved["rows"], saved["metadata"]
     identity = digest(
         {"config": teacher.config, "train": train, "excluded_ids": [r["id"] for r in excluded]}
     )
@@ -160,25 +164,17 @@ def distill(limit: int | None = None, workers: int = 1) -> dict:
     ]
 
     def generate(row):
-        return [
-            (
-                text,
-                [
-                    teacher.label(
-                        text,
-                        0.7,
-                        seed,
-                        examples=[
-                            example
-                            for example in retriever.neighbors(text, k=11)
-                            if example["id"] != row["id"]
-                        ][:10],
-                    )[0]
-                    for seed in [17, 42, 73]
-                ],
-            )
-            for text in teacher.paraphrases(row["text"], teacher.labels[row["label"]])
-        ]
+        generated = []
+        for text in teacher.paraphrases(row["text"], teacher.labels[row["label"]]):
+            # Retrieval is independent of the verification seed: calculate it once per rewrite.
+            examples = [
+                example
+                for example in retriever.neighbors(text, k=11)
+                if example["id"] != row["id"]
+            ][:10]
+            votes = [teacher.label(text, 0.7, seed, examples=examples)[0] for seed in [17, 42, 73]]
+            generated.append((text, votes))
+        return generated
 
     def save_source(row, generated):
         for text, votes in generated:
@@ -202,9 +198,14 @@ def distill(limit: int | None = None, workers: int = 1) -> dict:
         metadata["completed_sources"].append(row["id"])
         metadata["unique_kept"] = len(kept)
         metadata["keep_rate"] = len(kept) / metadata["proposed"]
+    def checkpoint():
         validate_distilled(kept, train, excluded)
+        snapshot.parent.mkdir(exist_ok=True)
+        temporary = snapshot.with_suffix(".tmp")
+        temporary.write_text(json.dumps({"metadata": metadata, "rows": kept}) + "\n")
+        # One atomic authoritative snapshot keeps counters and accepted rows in sync after a crash.
+        temporary.replace(snapshot)
         write_rows(path, kept)
-        progress.parent.mkdir(exist_ok=True)
         progress.write_text(json.dumps(metadata, indent=2) + "\n")
 
     # Bound outstanding requests; commit results in source order for stable deduplication.
@@ -215,8 +216,13 @@ def distill(limit: int | None = None, workers: int = 1) -> dict:
                 results = list(pool.map(generate, batch))
                 for row, generated in zip(batch, results, strict=True):
                     save_source(row, generated)
+                checkpoint()
+                # Stop only at a complete checkpoint; a later invocation resumes without lost sources.
+                if Path("runs/STOP_DISTILL").exists():
+                    break
     finally:
         teacher.client.close()
+    checkpoint()
     return {**metadata, "source_ids_verified": all(row["source_id"] in source for row in kept)}
 
 
