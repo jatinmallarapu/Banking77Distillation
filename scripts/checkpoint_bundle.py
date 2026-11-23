@@ -10,7 +10,15 @@ def bundle(root: Path, output: Path) -> dict:
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(".tmp")
     names = ["pyproject.toml", "README.md", "MODEL_CARD.md"]
-    for folder in ["src", "scripts", "configs", "data/prepared", "checkpoints", "evals/results"]:
+    for folder in [
+        "src",
+        "scripts",
+        "configs",
+        "data/prepared",
+        "checkpoints",
+        "evals/results",
+        "runs/teacher-shards",
+    ]:
         names.extend(
             str(p.relative_to(root)).replace("\\", "/")
             for p in (root / folder).rglob("*")

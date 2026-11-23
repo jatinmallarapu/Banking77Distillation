@@ -117,7 +117,7 @@ class Retriever:
         return [self.rows[index] for index in np.argsort(-scores, kind="stable")[:k]]
 
 
-def distill(limit: int | None = None, workers: int = 1) -> dict:
+def distill(limit: int | None = None, workers: int = 1, partition: Path | None = None) -> dict:
     if not 1 <= workers <= 64:
         raise ValueError("Use between 1 and 64 teacher workers")
     teacher = Teacher()
@@ -157,10 +157,21 @@ def distill(limit: int | None = None, workers: int = 1) -> dict:
         for group in grouped
         if index < len(group)
     ]
+    assignment = json.loads(partition.read_text()) if partition is not None else None
+    if assignment is not None:
+        count, index = assignment["count"], assignment["index"]
+        if not isinstance(count, int) or not isinstance(index, int) or not 0 <= index < count:
+            raise ValueError("Invalid source partition")
+        if metadata.get("partition", assignment) != assignment:
+            raise ValueError("Partition changed; use separate checkpoint directories")
+        metadata["partition"] = assignment
+    elif "partition" in metadata:
+        raise ValueError("A partition checkpoint requires its original assignment")
     pending = [
         row
-        for row in (ordered[:limit] if limit else ordered)
+        for index, row in enumerate(ordered[:limit] if limit else ordered)
         if row["id"] not in metadata["completed_sources"]
+        and (assignment is None or index % assignment["count"] == assignment["index"])
     ]
 
     def generate(row):
@@ -168,9 +179,7 @@ def distill(limit: int | None = None, workers: int = 1) -> dict:
         for text in teacher.paraphrases(row["text"], teacher.labels[row["label"]]):
             # Retrieval is independent of the verification seed: calculate it once per rewrite.
             examples = [
-                example
-                for example in retriever.neighbors(text, k=11)
-                if example["id"] != row["id"]
+                example for example in retriever.neighbors(text, k=11) if example["id"] != row["id"]
             ][:10]
             votes = [teacher.label(text, 0.7, seed, examples=examples)[0] for seed in [17, 42, 73]]
             generated.append((text, votes))
@@ -198,6 +207,7 @@ def distill(limit: int | None = None, workers: int = 1) -> dict:
         metadata["completed_sources"].append(row["id"])
         metadata["unique_kept"] = len(kept)
         metadata["keep_rate"] = len(kept) / metadata["proposed"]
+
     def checkpoint():
         validate_distilled(kept, train, excluded)
         snapshot.parent.mkdir(exist_ok=True)
