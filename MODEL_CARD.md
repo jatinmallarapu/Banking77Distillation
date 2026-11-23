@@ -31,7 +31,7 @@ Pinned Qwen2.5-0.5B-Instruct base, LoRA rank 16 / alpha 32 / dropout 0.05, all l
 layers, learning rate 2e-4, three epochs, maximum training length 128. Long query
 tails are truncated while retaining the instruction and complete label; counts
 must be recorded. Completion-only loss; checkpoint selected by validation loss.
-Seeds 17, 42 and 73 for gold-only Student A and augmented Student B.
+Seeds 1, 2 and 3 for gold-only Student A and augmented Student B.
 
 Teacher: pinned Qwen2.5-7B-Instruct-AWQ. Three paraphrases per training query,
 accepted only when three temperature-0.7 labels agree with each other and the

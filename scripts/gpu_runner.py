@@ -98,15 +98,15 @@ def main() -> None:
                     process.kill()
                     process.wait()
     if args.stage == "smoke":
-        command("train-student", "configs/student_a.yaml", "--seed", "17", "--smoke")
+        command("train-student", "configs/student_a.yaml", "--seed", "1", "--smoke")
     elif args.stage == "students":
         for student in ["a", "b"]:
-            for seed in [17, 42, 73]:
+            for seed in [1, 2, 3]:
                 command("train-student", f"configs/student_{student}.yaml", "--seed", str(seed))
     elif args.stage == "evaluate":
         # The server is stopped before loading students, so both never compete for T4 VRAM.
         for student in ["a", "b"]:
-            for seed in [17, 42, 73]:
+            for seed in [1, 2, 3]:
                 for batch in [1, 32]:
                     command(
                         "evaluate-gpu",

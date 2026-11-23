@@ -131,7 +131,7 @@ GPU smoke run. A two-step smoke checkpoint cannot pass the release readiness che
 
 - Student base: Qwen2.5-0.5B-Instruct, pinned revision, Apache 2.0.
 - Teacher: Qwen2.5-7B-Instruct-AWQ, pinned revision, Apache 2.0.
-- Three seeds each: 17, 42, 73. LoRA r=16, alpha=32, dropout=0.05, all linear layers.
+- Three seeds each: 1, 2, 3. LoRA r=16, alpha=32, dropout=0.05, all linear layers.
 - Completion-only SFT, three epochs, 2e-4 learning rate; best validation-loss checkpoint.
 - Maximum training length 128, with explicitly counted query-tail truncation that
   retains the full label. BF16 where supported, FP16 otherwise.

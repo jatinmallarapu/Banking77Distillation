@@ -42,7 +42,7 @@ invokes the same source code; all training logic lives in `src/b77/`.
    representative accepted/rejected examples and leakage checks before training.
    A consistent teacher can still be consistently wrong.
 3. `python scripts/gpu_runner.py students` trains Student A and Student B for
-   seeds 17, 42, 73, with completion-only loss, validation evaluation each epoch
+   seeds 1, 2, 3, with completion-only loss, validation evaluation each epoch
    and the best validation-loss checkpoint. Long query tails are explicitly
    truncated to fit 128 tokens without cutting the complete label; counts are logged.
 4. `python scripts/gpu_runner.py evaluate --gpu-hourly-price 0` measures zero-shot,

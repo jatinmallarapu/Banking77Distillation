@@ -10,7 +10,7 @@ import numpy as np
 def readiness(root: Path = Path(".")) -> dict:
     runs = []
     for student in ["a", "b"]:
-        for seed in [17, 42, 73]:
+        for seed in [1, 2, 3]:
             path = root / f"checkpoints/student_{student}/{seed}/training_manifest.json"
             if not path.exists():
                 raise ValueError(f"Missing completed training manifest: {path}")
