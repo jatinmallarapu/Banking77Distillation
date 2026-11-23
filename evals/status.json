@@ -1,0 +1,11 @@
+{
+  "tfidf_baseline": "measured_on_official_test",
+  "teacher_zero_shot": "not_run",
+  "teacher_few_shot": "not_run",
+  "teacher_distillation_keep_rate": null,
+  "student_a_seeds": {"17": "not_run", "42": "not_run", "73": "not_run"},
+  "student_b_seeds": {"17": "not_run", "42": "not_run", "73": "not_run"},
+  "gpu_latency_cost_comparisons": "not_measured",
+  "hugging_face_publication": "deferred_by_owner",
+  "paid_compute": "not_authorized_or_used"
+}

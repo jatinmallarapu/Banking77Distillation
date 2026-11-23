@@ -1,0 +1,5 @@
+# Loopback-only deployment; it trains only the small CPU baseline during image build.
+services:
+  api:
+    build: .
+    ports: ["127.0.0.1:8000:8000"]

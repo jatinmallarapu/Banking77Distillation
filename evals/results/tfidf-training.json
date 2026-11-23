@@ -1,0 +1,12 @@
+{
+  "threshold": {
+    "threshold": 0.09625477523611763,
+    "target_accuracy": 0.9,
+    "validation_coverage": 0.974,
+    "validation_selective_accuracy": 0.9004106776180698,
+    "selection": "Maximize validation coverage with >=30 accepted and target empirical accuracy; not a guarantee."
+  },
+  "train_sha256": "3a9a1884be83fc6acdd75024ca509c8041854db9d29ac41266d3922ca3ae5e39",
+  "validation_sha256": "15d3fdf6dde8f405feec0b1341c482a951653a1010cd46ffdcfc901f1c628547",
+  "training_seconds": 39.50929360000009
+}

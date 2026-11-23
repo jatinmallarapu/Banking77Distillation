@@ -1,0 +1,13 @@
+*
+!Dockerfile
+!pyproject.toml
+!src/
+!src/**
+!configs/
+!configs/**
+!data/
+!data/labels.json
+!evals/
+!evals/gate_subset.jsonl
+!evals/baseline.json
+**/__pycache__/

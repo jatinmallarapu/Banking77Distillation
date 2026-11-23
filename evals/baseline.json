@@ -1,0 +1,9 @@
+{
+  "system": "tfidf",
+  "macro_f1": 0.9009623132999757,
+  "gate_sha256": "66562a25b569ed4aec37fc272733dd63fb0be728dc4c61a7fd894f72b62e21d9",
+  "train_sha256": "3a9a1884be83fc6acdd75024ca509c8041854db9d29ac41266d3922ca3ae5e39",
+  "labels_sha256": "968318db56ec61eeec842a13dc6def991d9a820088553beb6440d544bdf69307",
+  "max_absolute_f1_drop": 0.01,
+  "note": "Review changes to this file separately from candidate code."
+}

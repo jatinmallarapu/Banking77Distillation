@@ -1,0 +1,35 @@
+# GPU experiments and Hub uploads never run on a pull request.
+name: CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  cpu-quality-gate:
+    runs-on: ubuntu-latest
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -e '.[dev]'
+      - run: make data
+      - run: b77 train-baseline
+      - run: make lint
+      - run: python -m pytest --cov=b77 --cov-report=term-missing -q
+      - run: make gate
+      - run: python scripts/security_eval.py
+      - run: docker compose up --build --detach
+      - run: python scripts/check_service.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cpu-gate-and-security-results
+          path: evals/results/
+      - if: failure()
+        run: docker compose logs
+      - if: always()
+        run: docker compose down
