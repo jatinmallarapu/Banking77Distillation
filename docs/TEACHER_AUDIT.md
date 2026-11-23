@@ -42,5 +42,10 @@ retention, latency and per-label coverage. Human inspection is still necessary:
 teacher agreement does not prove that a paraphrase preserved meaning. No target
 keep-rate range or improvement over the gold-only student is guaranteed.
 
+Reproduce a five-source raw-output diagnostic with
+`python -m b77.audit_teacher --samples 5 --output runs/teacher-audit.json`.
+This script excludes both the source ID and exact normalized duplicate queries
+from its retrieval context, and stores the retrieved source IDs for inspection.
+
 The revised GPU pilot is pending. Full student comparisons and publication remain
 pending; these diagnostics do not justify a released-model claim.
