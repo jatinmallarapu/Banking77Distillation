@@ -69,3 +69,7 @@ Future adapted-data publication must retain attribution. Planned repository name
 `JatinMallarapu/qwen2.5-0.5b-banking77-distill`; no public repository or weights are
 claimed to exist. Publication is authorized for the two model repositories but
 remains gated on complete training, evaluation and anonymous verification.
+
+## First release scope
+
+The selected first release uses an intent-balanced 200-query teacher subset while retaining all 8,992 gold training queries and three seeds per student. The all-source teacher study is future work. Earlier interrupted-run validation logs are not current release weights. This template is replaced with measured evidence only after the new runs pass the publication gate.

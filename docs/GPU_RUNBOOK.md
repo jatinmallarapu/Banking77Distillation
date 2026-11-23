@@ -1,21 +1,22 @@
 # Existing free-GPU runner
 
-**Execution status (November 22, 2026):** the owner authorized an existing free
-Kaggle GPU session and publication after verified training and evaluation. No paid
-compute is authorized. Two Tesla T4 GPUs were allocated; the two-step Student A
-smoke completed successfully on Python 3.11.18. Full Student A training has started.
-The smoke adapter is not releaseable. Teacher execution, full comparisons and
-public Hugging Face weights are still pending; no release claim is justified.
+**Current scope (November 23, 2026):** the owner selected a first pilot release:
+200 intent-balanced teacher sources, all 8,992 gold training queries, and three
+seeds per student. Public weights remain pending measured evaluation and
+anonymous verification. The earlier session stopped without a verified external
+checkpoint; its logged validation losses are historical, not release artifacts.
 
-Use an existing Linux CUDA session with at least 14 GiB available VRAM, such as a
-free T4 session where available. Quotas, availability and session limits vary;
-this repository does not promise that the full experiment fits one session.
-Persist `checkpoints/`, `data/distilled.jsonl`, and `runs/` between sessions.
-Teacher generation involves three paraphrases and nine verification calls per
-source query: approximately 108,000 requests for the current training split.
-All-label likelihood evaluation also scores 77 candidates per query. Start with
-the smoke run and a small explicit `b77 distill --limit 10` to estimate your own
-runtime. No training-time or GPU-cost estimates are presented as measurements.
+Use [the pilot release workflow](PILOT_RELEASE.md) and
+[`notebooks/free_gpu_runner.ipynb`](../notebooks/free_gpu_runner.ipynb). It runs in
+a committed foreground job and verifies private recovery uploads before training.
+Environments and model caches stay outside `/kaggle/working`. No paid compute is
+provisioned. Availability, quotas and session limits can still interrupt a run;
+verified private backups support an explicit restore.
+
+The 200-source pilot nominally makes 2,000 successful teacher requests: one
+paraphrase request and nine verification requests per source, excluding retries.
+All-label evaluation still scores all 77 complete label sequences. No projected
+runtime is reported as a measurement.
 
 ## Environment
 

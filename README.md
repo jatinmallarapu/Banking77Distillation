@@ -5,28 +5,34 @@
 [![Data: CC BY 4.0](https://img.shields.io/badge/data-CC_BY_4.0-146d7f.svg)](ATTRIBUTION.md)
 
 **When is prompting not enough?** A reproducible experiment for comparing prompting,
-fine-tuning and distillation in customer-intent routingâ€”starting with a measured
+fine-tuning and distillation in customer-intent routing—starting with a measured
 CPU reference and recording GPU execution status explicitly.
 
 ## Results and execution status
 
-The TF-IDF/logistic model was actually trained and evaluated on all **3,080 official
-test queries**. A real T4 GPU smoke passed, Student A seeds 1 and 2 finished full training, and a
-versioned 200-source teacher pilot completed; full generation has resumed. No completed Qwen comparison or
-Hugging Face release is claimed. See the [teacher investigation](docs/TEACHER_AUDIT.md).
+The TF-IDF/logistic model was trained and evaluated on all **3,080 official test
+queries**. **The public distilled model is not released yet.** The first release
+now uses an intent-balanced **200-query teacher subset**, the full **8,992-query
+gold training split**, and three seeds per student. The larger all-source study
+remains future work.
+
+An earlier Kaggle session trained two gold-only seeds but stopped before a
+verified external backup. Those checkpoints are not treated as current release
+artifacts. The retry uses verified private checkpoints and a foreground committed
+job. [Pilot execution and recovery](docs/PILOT_RELEASE.md).
 
 | System | Status | Test accuracy, 95% CI | Test macro-F1, 95% CI |
 | --- | --- | --- | --- |
 | TF-IDF + logistic regression | **Measured, CPU** | **88.67% [87.61, 89.81]** | **88.71% [87.62, 89.85]** |
-| Zero-shot Qwen2.5-7B AWQ | Runner implemented; unrun | â€” | â€” |
-| Retrieval few-shot Qwen2.5-7B AWQ | Runner implemented; unrun | â€” | â€” |
-| Student A Â· gold only, three seeds | Two seeds trained; seed 3 and evaluation pending | â€” | â€” |
-| Student B Â· gold + distilled, three seeds | Training/evaluation code; unrun | â€” | â€” |
+| Zero-shot Qwen2.5-7B AWQ | Runner implemented; unrun | — | — |
+| Retrieval few-shot Qwen2.5-7B AWQ | Runner implemented; unrun | — | — |
+| Student A · gold only, three seeds | Pilot rerun and final evaluation pending | — | — |
+| Student B · gold + distilled, three seeds | Training/evaluation code; unrun | — | — |
 
-**Teacher-data pilot:** retained **478/600 paraphrases (79.67%)** from 200 training
+**Historical teacher-data pilot (interrupted run):** retained **478/600 paraphrases (79.67%)** from 200 training
 queries covering all 77 intents, in **21.79 minutes** on one T4. Three seeded votes
 still had to agree with the source gold label. This is augmentation retention,
-not test accuracy or human-verified semantic quality. [Pilot evidence](evals/results/teacher-pilot200.json).
+not test accuracy or human-verified semantic quality. These are historical audit results, not the new release's training artifacts. [Pilot evidence](evals/results/teacher-pilot200.json).
 
 The intervals use 300 label-stratified bootstrap resamples of a fixed model; they
 are not training-seed standard deviations. [Full measured report](evals/results/tfidf-test.json)
@@ -61,14 +67,14 @@ decision must wait for the predeclared GPU runs.
 
 ```mermaid
 flowchart LR
-  D[Banking77 Â· pinned Parquet revision] --> S[Deduplicate + stratified train / validation]
+  D[Banking77 · pinned Parquet revision] --> S[Deduplicate + stratified train / validation]
   S --> B[Measured TF-IDF reference]
-  S --> T[Qwen 7B Â· training-only paraphrases]
+  S --> T[Qwen 7B · training-only paraphrases]
   T --> F[Three votes agree with source gold + leakage filter]
-  S --> A[Student A Â· gold only]
-  F --> C[Student B Â· gold + distilled]
+  S --> A[Student A · gold only]
+  F --> C[Student B · gold + distilled]
   A & C --> V[Validation checkpoint / temperature / abstention]
-  B & V --> E[Fixed test Â· quality / calibration / latency / cost]
+  B & V --> E[Fixed test · quality / calibration / latency / cost]
   E --> G[300-case CI gate + live consistency check]
   B --> API[FastAPI CPU /classify service]
   C -. future, not published .-> H[Local merged weights / adapter / model card]
@@ -157,7 +163,7 @@ labels, not wrong allowed labels or injection success.
 
 The 50 authored injection pairs cross five clean prompts with ten override
 wrappers. Their measured paired-change rate is a narrow regression result, not a
-claim of comprehensive security. [Attack pairs](evals/injection_set.jsonl) Â·
+claim of comprehensive security. [Attack pairs](evals/injection_set.jsonl) ·
 [Measured outcomes](evals/results/tfidf-injections.json)
 
 Every PR rebuilds the baseline and scores the gate. CI blocks a macro-F1 decline
@@ -173,7 +179,7 @@ uploads never run in CI. Baseline changes must be reviewed separately.
 | 100 users | 902 | 0 | 112.2 | 110 / 340 ms |
 
 These are short ten-second, loopback tests with think time, a ramp and shared
-client/server CPUâ€”not sustained capacity benchmarks. [Raw CSV and configuration](benchmarks/results.json).
+client/server CPU—not sustained capacity benchmarks. [Raw CSV and configuration](benchmarks/results.json).
 The Locust file adapts the request pattern from LanguageModelInferenceBenchmark.
 
 ## Model release status

@@ -70,3 +70,5 @@ generation smoke establishes accuracy. The full quality reports remain essential
 Only after `release/public_verification.json` reports success should the GitHub
 README, profile and release notes link the public models as released artifacts.
 The resume release sentence must wait for that verification as well.
+
+The first release declares a balanced 200-source teacher budget while retaining all 8,992 gold rows and all six student runs. The gate requires that complete declared prefix. The larger all-source study is not claimed complete.

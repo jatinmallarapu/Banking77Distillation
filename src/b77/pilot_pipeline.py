@@ -78,8 +78,12 @@ class Pipeline:
         self.last_heartbeat = time.monotonic()
         completed = []
         for path in self.root.glob("checkpoints/student_*/*/training_manifest.json"):
-            if json.loads(path.read_text()).get("status") == "trained":
-                completed.append(str(path.parent.relative_to(self.root)))
+            try:
+                if json.loads(path.read_text()).get("status") == "trained":
+                    completed.append(str(path.parent.relative_to(self.root)))
+            except (FileNotFoundError, json.JSONDecodeError):
+                # A status observer may race the final manifest write; release gates do not.
+                continue
         snapshot = self.root / "runs/distill-checkpoint.json"
         sources = (
             len(json.loads(snapshot.read_text())["metadata"]["completed_sources"])

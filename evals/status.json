@@ -4,28 +4,35 @@
   "teacher_few_shot": "not_run",
   "teacher_distillation_keep_rate": null,
   "student_a_seeds": {
-    "1": "trained_evaluation_pending",
-    "2": "trained_evaluation_pending",
-    "3": "waiting_for_teacher_gpu_capacity"
+    "1": "rerun_pending_after_session_interruption",
+    "2": "rerun_pending_after_session_interruption",
+    "3": "rerun_pending_after_session_interruption"
   },
   "student_b_seeds": {
-    "1": "queued_after_full_teacher_merge",
-    "2": "queued_after_full_teacher_merge",
-    "3": "queued_after_full_teacher_merge"
+    "1": "pending_pilot_teacher_data",
+    "2": "pending_pilot_teacher_data",
+    "3": "pending_pilot_teacher_data"
   },
   "gpu_latency_cost_comparisons": "not_measured",
   "hugging_face_publication": "authorized_pending_complete_training_and_evaluation",
   "paid_compute": "not_authorized_or_used",
   "gpu_smoke": "passed_two_steps_not_releaseable",
-  "teacher_distillation": "dual_gpu_partitioned_generation_in_progress",
+  "teacher_distillation": "pilot_rerun_preparing",
   "teacher_pilot": {
     "report": "evals/results/teacher-pilot200.json",
     "sources": 200,
     "proposed": 600,
     "unique_kept": 478,
-    "keep_rate": 0.7966666666666666
+    "keep_rate": 0.7966666666666666,
+    "scope": "historical_interrupted_run"
   },
   "hugging_face_namespace": "JatinMallarapu",
   "hugging_face_authentication": "verified_without_logging_credentials",
-  "status_note": "Checkpoint snapshot, not a live progress feed. All final GPU test metrics and the public model release remain pending."
+  "status_note": "Checkpoint snapshot, not a live progress feed. All final GPU test metrics and the public model release remain pending.",
+  "study_scope": "pilot200_full_gold",
+  "teacher_source_budget": 200,
+  "private_checkpoint_repository": "JatinMallarapu/Banking77TrainingCheckpoints",
+  "private_checkpoint_repository_visibility": "verified_private",
+  "previous_attempt": "interrupted; trained adapters not present in replacement session; queued Kaggle save not verified",
+  "full_all_source_study": "future_work_not_completed"
 }

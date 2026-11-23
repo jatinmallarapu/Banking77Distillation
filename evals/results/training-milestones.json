@@ -1,6 +1,6 @@
 {
   "scope": "training_validation_only_not_heldout_test_results",
-  "status": "two_student_a_seeds_trained_other_runs_pending",
+  "status": "historical_interrupted_attempt_checkpoints_not_recovered",
   "hardware": "Tesla T4",
   "runs": [
     {
@@ -17,5 +17,6 @@
     }
   ],
   "heldout_accuracy": null,
-  "distilled_weights_published": false
+  "distilled_weights_published": false,
+  "note": "These observed validation losses are retained as an experiment log, not as current trained release artifacts."
 }

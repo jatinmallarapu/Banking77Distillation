@@ -9,7 +9,14 @@ from pathlib import Path
 def bundle(root: Path, output: Path) -> dict:
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(".tmp")
-    names = ["pyproject.toml", "README.md", "MODEL_CARD.md"]
+    names = [
+        "pyproject.toml",
+        "README.md",
+        "MODEL_CARD.md",
+        "LICENSE",
+        "ATTRIBUTION.md",
+        "evals/baseline.json",
+    ]
     for folder in [
         "src",
         "scripts",
