@@ -395,7 +395,8 @@ def publish(root: Path, token: str) -> dict:
     uploaded = {}
     for kind, name in REPOSITORIES.items():
         repo_id = f"{NAMESPACE}/{name}"
-        api.create_repo(repo_id, repo_type="model", private=False, exist_ok=True)
+        # Keep new repositories private until both artifact uploads have completed.
+        api.create_repo(repo_id, repo_type="model", private=True, exist_ok=True)
         commit = api.upload_folder(
             repo_id=repo_id,
             repo_type="model",
@@ -404,6 +405,8 @@ def publish(root: Path, token: str) -> dict:
             commit_message="Release measured Banking77 student",
         )
         uploaded[repo_id] = {"commit": commit.oid, "files_sha256": prepared[kind]}
+    for repo_id in uploaded:
+        api.update_repo_settings(repo_id=repo_id, repo_type="model", private=False)
     result = {"status": "uploaded_pending_anonymous_verification", "models": uploaded}
     (root / "release/upload_receipt.json").write_text(json.dumps(result, indent=2) + "\n")
     return result
