@@ -30,6 +30,7 @@ def validate_plan(root: Path) -> None:
 class Pipeline:
     def __init__(self, root: Path, token: str, max_hours: float):
         self.root, self.token = root, token
+        self.seeds = [1, 2, 3]
         self.deadline = time.monotonic() + max_hours * 3600
         self.stopped = threading.Event()
         self.failed = threading.Event()
@@ -162,7 +163,7 @@ class Pipeline:
 
     def train(self, student: str, device: int):
         try:
-            for seed in [1, 2, 3]:
+            for seed in self.seeds:
                 folder = self.root / f"checkpoints/student_{student}/{seed}"
                 manifest = folder / "training_manifest.json"
                 if (
@@ -231,9 +232,9 @@ class Pipeline:
                 time.sleep(1)
         raise TimeoutError("Teacher server readiness timeout")
 
-    def evaluate_teacher(self):
+    def evaluate_teacher(self, device: int = 1, systems: tuple = ("zeroshot", "fewshot")):
         try:
-            for system in ["zeroshot", "fewshot"]:
+            for system in systems:
                 for batch in [1, 32]:
                     path = self.root / f"evals/results/{system}-batch{batch}.json"
                     if path.exists() and json.loads(path.read_text()).get("status") == "measured":
@@ -250,7 +251,7 @@ class Pipeline:
                         "--teacher-backend",
                         "local-awq",
                         name=f"eval-{system}-{batch}",
-                        device=1,
+                        device=device,
                     )
         except Exception as error:
             print(json.dumps({"teacher_evaluation_error": str(error)}), flush=True)

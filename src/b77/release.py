@@ -7,12 +7,14 @@ from pathlib import Path
 import numpy as np
 
 from .repro import adapter_fingerprint, file_fingerprint
+from .release_plan import release_plan
 
 
 def readiness(root: Path = Path(".")) -> dict:
+    plan = release_plan(root)
     runs = []
     for student in ["a", "b"]:
-        for seed in [1, 2, 3]:
+        for seed in plan["seeds"]:
             path = root / f"checkpoints/student_{student}/{seed}/training_manifest.json"
             if not path.exists():
                 raise ValueError(f"Missing completed training manifest: {path}")
@@ -37,13 +39,17 @@ def readiness(root: Path = Path(".")) -> dict:
             "accuracy_mean": float(
                 np.mean([r["report"]["accuracy"] for r in runs if r["student"] == student])
             ),
-            "accuracy_std": float(
+            "accuracy_std": None
+            if len(plan["seeds"]) == 1
+            else float(
                 np.std([r["report"]["accuracy"] for r in runs if r["student"] == student], ddof=1)
             ),
             "macro_f1_mean": float(
                 np.mean([r["report"]["macro_f1"] for r in runs if r["student"] == student])
             ),
-            "macro_f1_std": float(
+            "macro_f1_std": None
+            if len(plan["seeds"]) == 1
+            else float(
                 np.std([r["report"]["macro_f1"] for r in runs if r["student"] == student], ddof=1)
             ),
         }
@@ -56,6 +62,7 @@ def readiness(root: Path = Path(".")) -> dict:
     )
     return {
         "status": "ready_for_local_merge",
+        "release_plan": plan,
         "summary": summary,
         "selected_seed": selected["seed"],
         "selected_test_report": selected["report"],

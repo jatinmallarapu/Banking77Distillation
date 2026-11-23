@@ -13,6 +13,7 @@ from huggingface_hub import HfApi
 
 from .data import digest, read_rows
 from .release import readiness
+from .release_plan import release_plan
 from .repro import adapter_fingerprint, file_fingerprint
 from .prompts import STUDENT_SYSTEM
 from .teacher import ordered_sources, validate_distilled
@@ -45,6 +46,7 @@ SECRET = re.compile(r"hf_[A-Za-z0-9]{20,}|sk-(?:proj-|svcacct-)?[A-Za-z0-9_-]{20
 
 
 def release_evidence(root: Path) -> dict:
+    plan = release_plan(root)
     selected = readiness(root)
     train = read_rows(root / "data/prepared/train.jsonl")
     validation = read_rows(root / "data/prepared/validation.jsonl")
@@ -75,8 +77,8 @@ def release_evidence(root: Path) -> dict:
         raise ValueError("Matching teacher data for the declared source budget is required")
     validate_distilled(distilled, train, validation + test, names=labels)
     reports = {}
-    for system in ["zeroshot", "fewshot"] + [
-        f"student_{student}-seed{seed}" for student in ["a", "b"] for seed in [1, 2, 3]
+    for system in plan["teacher_systems"] + [
+        f"student_{student}-seed{seed}" for student in ["a", "b"] for seed in plan["seeds"]
     ]:
         for batch in [1, 32]:
             key = f"{system}-batch{batch}"
@@ -95,7 +97,7 @@ def release_evidence(root: Path) -> dict:
             reports[key] = report
     manifests = {}
     for student in ["a", "b"]:
-        for seed in [1, 2, 3]:
+        for seed in plan["seeds"]:
             folder = root / f"checkpoints/student_{student}/{seed}"
             manifest = json.loads((folder / "training_manifest.json").read_text())
             expected = train + distilled if student == "b" else train
@@ -134,6 +136,7 @@ def release_evidence(root: Path) -> dict:
         )
     return {
         "selection": selected,
+        "release_plan": plan,
         "teacher_progress": progress,
         "reports": reports,
         "tfidf_cpu_reference": baseline,
@@ -149,6 +152,7 @@ def release_evidence(root: Path) -> dict:
 
 
 def model_card(evidence: dict, adapter: bool) -> str:
+    plan = evidence.get("release_plan", {"version": "three-seed-pilot", "seeds": [1, 2, 3]})
     library = "peft" if adapter else "transformers"
     selected_seed = evidence["selection"]["selected_seed"]
     selected_manifest = evidence["training_manifests"][f"student_b-seed{selected_seed}"]
@@ -171,7 +175,7 @@ def model_card(evidence: dict, adapter: bool) -> str:
         "tags: [distillation, intent-classification, banking, lora]",
         "---",
         "",
-        "# Banking77 distilled intent router",
+        f"# Banking77 distilled intent router — {plan['version']}",
         "",
         "## Model summary and intended use",
         "",
@@ -202,7 +206,7 @@ def model_card(evidence: dict, adapter: bool) -> str:
         f"Retention: {evidence['teacher_progress']['keep_rate']:.6%}.",
         "",
         "Student A uses gold-only data; Student B adds accepted teacher data. "
-        "Both use seeds 1, 2, 3. The released Student B seed is selected by validation loss, "
+        f"Declared seeds per student: {plan['seeds']}. The released Student B seed is selected by validation loss, "
         "never test accuracy.",
         "",
         f"Selected seed: {selected_seed}. GPU: {selected_manifest['gpu']}. "
@@ -215,7 +219,9 @@ def model_card(evidence: dict, adapter: bool) -> str:
         "## Measured results",
         "",
         "Each interval is a fixed-model, label-stratified bootstrap interval. "
-        "The three seeds are shown separately; their variation is not a query-bootstrap interval.",
+        "Seeds are shown separately; their variation is not a query-bootstrap interval. "
+        "A single-seed v0.1 cannot estimate training-seed variation; additional seeds, "
+        "the few-shot comparison and full-source study remain future work for that release.",
         "",
         "| System | Accuracy [95% CI] | Macro-F1 [95% CI] | p50 / p95 ms, batch 1 |",
         "| --- | --- | --- | --- |",
