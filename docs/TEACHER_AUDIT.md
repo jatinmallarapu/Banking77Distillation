@@ -47,5 +47,20 @@ Reproduce a five-source raw-output diagnostic with
 This script excludes both the source ID and exact normalized duplicate queries
 from its retrieval context, and stores the retrieved source IDs for inspection.
 
-The revised GPU pilot is pending. Full student comparisons and publication remain
-pending; these diagnostics do not justify a released-model claim.
+## Measured revised pilot
+
+The completed pilot covered all 77 labels, with two or three source queries per
+label. Of 600 proposals, 486 passed unanimous verification and 478 remained after
+duplicate/split-overlap exclusion: **79.67% retained**. Runtime was **1,307.42
+seconds (21.79 minutes)** on one Tesla T4, while Student A trained on the other
+T4. Eight request workers were used. This is training-data retention, not held-out
+accuracy or human-verified paraphrase quality.
+
+[Machine-readable evidence](../evals/results/teacher-pilot200.json) records config,
+source-ID and generated-data fingerprints. The failed v1 outputs and the completed
+v2 pilot were preserved separately in the GPU workspace. Full v2 generation resumed
+from these 200 sources with 16 request workers and a nine-hour execution bound;
+its total runtime and full-data retention remain unmeasured.
+
+Full student comparisons and publication remain pending. The pilot does not
+justify a released-model claim, nor a 5â€“7-hour estimate for the full experiment.

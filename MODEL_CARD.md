@@ -11,11 +11,11 @@ tags:
   - distillation
 ---
 
-# Banking77 Distill — release preparation card
+# Banking77 Distill â€” release preparation card
 
 **Status: NOT TRAINED / NOT PUBLISHED.** This is a repository-side preparation
-card, not evidence of a Hugging Face model release. The owner requested preparation
-without GPU spending or Hub publication. Do not upload this draft as a completed
+card, not evidence of a Hugging Face model release. GPU execution is underway;
+publication requires complete training and evaluation evidence. Do not upload this draft as a completed
 model or claim that the comparisons below have been measured.
 
 ## Intended use
@@ -41,7 +41,7 @@ checks are required. Keep rate: **not measured**.
 ## Measured results
 
 The GitHub CPU baseline report is a TF-IDF/logistic model, not this Qwen model.
-Qwen quality, bootstrap intervals, three-seed mean ± standard deviation, calibration,
+Qwen quality, bootstrap intervals, three-seed mean Â± standard deviation, calibration,
 GPU latency, cost and injection robustness: **not measured**. Fill them only from
 completed, hash-matched GPU reports. A smoke training run is not releaseable.
 

@@ -3,9 +3,26 @@
   "teacher_zero_shot": "not_run",
   "teacher_few_shot": "not_run",
   "teacher_distillation_keep_rate": null,
-  "student_a_seeds": {"1": "not_run", "2": "not_run", "3": "not_run"},
-  "student_b_seeds": {"1": "not_run", "2": "not_run", "3": "not_run"},
+  "student_a_seeds": {
+    "1": "training_in_progress",
+    "2": "queued",
+    "3": "queued"
+  },
+  "student_b_seeds": {
+    "1": "pending_teacher_pilot",
+    "2": "pending_teacher_pilot",
+    "3": "pending_teacher_pilot"
+  },
   "gpu_latency_cost_comparisons": "not_measured",
-  "hugging_face_publication": "deferred_by_owner",
-  "paid_compute": "not_authorized_or_used"
+  "hugging_face_publication": "authorized_pending_complete_training_and_evaluation",
+  "paid_compute": "not_authorized_or_used",
+  "gpu_smoke": "passed_two_steps_not_releaseable",
+  "teacher_distillation": "full_v2_generation_in_progress_after_successful_pilot",
+  "teacher_pilot": {
+    "report": "evals/results/teacher-pilot200.json",
+    "sources": 200,
+    "proposed": 600,
+    "unique_kept": 478,
+    "keep_rate": 0.7966666666666666
+  }
 }

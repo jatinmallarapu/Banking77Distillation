@@ -1,0 +1,21 @@
+{
+  "status": "measured_training_data_pilot",
+  "protocol": "intent_preserving_retrieval_v2",
+  "sources": 200,
+  "intents_covered": 77,
+  "sources_per_intent_min": 2,
+  "sources_per_intent_max": 3,
+  "proposed": 600,
+  "all_votes_matched": 486,
+  "unique_kept": 478,
+  "keep_rate": 0.7966666666666666,
+  "elapsed_seconds": 1307.4183130109998,
+  "workers": 8,
+  "label_temperature": 0.7,
+  "required_agreement": "3 of 3 votes match source gold",
+  "teacher_revision": "b25037543e9394b818fdfca67ab2a00ecc7dd641",
+  "input_identity": "17bb84858b09227c2eae68a1b08eb56a3ef24c5a484e68e2b008522143195100",
+  "source_ids_sha256": "a53ba32dbbc9745d0c20c87a578488178524123834dd02fafacfb6928954402c",
+  "filtered_rows_sha256": "2332b674c0f221072134a94ad0186bc7ea9670a24d5340844500f25d75b0c9b4",
+  "scope": "training-source augmentation retention; not held-out accuracy or human-verified semantic quality"
+}
