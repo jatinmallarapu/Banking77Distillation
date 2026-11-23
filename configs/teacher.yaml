@@ -3,5 +3,6 @@ revision: b25037543e9394b818fdfca67ab2a00ecc7dd641
 temperature: 0.7
 paraphrases_per_query: 3
 agreement_votes: 3
+distillation_protocol: intent_preserving_retrieval_v2
 few_shot_neighbors: 10
 # Exact vLLM 0.8.5.post1 uses guided_choice; newer versions require an API migration.

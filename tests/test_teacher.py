@@ -62,11 +62,13 @@ def test_parallel_filter_commits_in_order_and_resumes(tmp_path, monkeypatch):
         def __init__(self):
             self.client = httpx.Client()
 
-        def paraphrases(self, text):
+        def paraphrases(self, text, intent=None):
             calls.append(text)
             return [text + " paraphrase", "shared paraphrase", "validation query"]
 
-        def label(self, text, temperature, seed):
+        def label(self, text, temperature, seed, examples=None):
+            assert examples is not None
+            assert all(example["text"] + " paraphrase" != text for example in examples)
             return "card_arrival", {}
 
     monkeypatch.setattr(module, "Teacher", FakeTeacher)
