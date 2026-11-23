@@ -147,6 +147,7 @@ class Pipeline:
                     self.root.glob("checkpoints/student_*/*/checkpoint-*/trainer_state.json")
                 )
                 paths += list(self.root.glob("checkpoints/student_*/*/training_manifest.json"))
+                paths += list(self.root.glob("evals/results/progress/**/batch-*.json"))
                 signature = tuple(sorted((str(p), p.stat().st_mtime_ns) for p in paths))
                 if signature != previous or time.monotonic() - self.last_backup >= 900:
                     self.backup()

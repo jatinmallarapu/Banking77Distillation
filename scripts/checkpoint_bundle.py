@@ -28,7 +28,10 @@ def bundle(root: Path, output: Path) -> dict:
         names.extend(
             str(p.relative_to(root)).replace("\\", "/")
             for p in (root / folder).rglob("*")
-            if p.is_file() and "__pycache__" not in p.parts and not p.is_symlink()
+            if p.is_file()
+            and "__pycache__" not in p.parts
+            and not p.is_symlink()
+            and p.suffix != ".tmp"
         )
     # Completed runs need their final adapter, not duplicate optimizer tensors.
     # An unfinished run keeps its last complete optimizer checkpoint for real resume.

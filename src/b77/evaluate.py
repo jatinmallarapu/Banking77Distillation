@@ -1,15 +1,15 @@
 """Run matched GPU comparisons, calibrating and selecting abstention only on validation."""
 
 import json
-import time
 from pathlib import Path
 
 import numpy as np
 
 from .data import digest, read_rows, write_rows
 from .guardrails import mask
+from .eval_progress import score_checkpointed
 from .metrics import choose_threshold, evaluate
-from .repro import adapter_fingerprint
+from .repro import adapter_fingerprint, file_fingerprint
 from .scoring import LocalAWQTeacherScorer, RemoteScorer, StudentScorer, fit_temperature, softmax
 
 
@@ -43,11 +43,29 @@ def gpu_evaluate(
             train, fewshot=system == "fewshot"
         )
     )
-    score_parts = []
-    for offset in range(0, len(validation), batch_size):
-        values, _ = scorer.score([row["text"] for row in validation[offset : offset + batch_size]])
-        score_parts.append(values)
-    validation_scores = np.concatenate(score_parts)
+    identity = {
+        "schema": 1,
+        "system": system,
+        "adapter": fingerprint,
+        "label_count": len(labels),
+        "labels": digest(labels),
+        "training": digest(train),
+        "backend": "student" if adapter else teacher_backend,
+        "gpu": torch.cuda.get_device_name(0) if torch.cuda.is_available() else "remote_vllm",
+        "torch": torch.__version__,
+        "cuda": torch.version.cuda,
+        "source": {
+            name: file_fingerprint(Path(__file__).parent / name)
+            for name in ["scoring.py", "prompts.py", "eval_progress.py"]
+        },
+        "model_config": file_fingerprint(
+            Path("configs/student_a.yaml" if adapter else "configs/teacher.yaml")
+        ),
+    }
+    cache = Path(f"evals/results/progress/{system}-batch{batch_size}")
+    validation_scores, _, validation_resumed = score_checkpointed(
+        validation, scorer, batch_size, cache / "validation", identity
+    )
     temperature = fit_temperature(validation_scores, np.array([r["label"] for r in validation]))
     threshold = choose_threshold(
         np.array([r["label"] for r in validation]), softmax(validation_scores, temperature)
@@ -57,11 +75,15 @@ def gpu_evaluate(
     latencies = []
     elapsed_total = 0.0
     total_tokens = {"input_tokens": 0, "output_tokens": 0}
-    for offset in range(0, len(test), batch_size):
+    test_scores, measured_batches, test_resumed = score_checkpointed(
+        test, scorer, batch_size, cache / "test", identity
+    )
+    for measured in measured_batches:
+        offset = measured["offset"]
         rows = test[offset : offset + batch_size]
-        started = time.perf_counter()
-        values, usage = scorer.score([row["text"] for row in rows])
-        elapsed = time.perf_counter() - started
+        values = test_scores[offset : offset + len(rows)]
+        usage = measured["tokens"]
+        elapsed = measured["elapsed_seconds"]
         elapsed_total += elapsed
         probability = softmax(values, temperature)
         probabilities.extend(probability)
@@ -87,6 +109,14 @@ def gpu_evaluate(
     report.update(
         {
             "status": "measured",
+            "evaluation_recovery": {
+                "validation_rows_reused": validation_resumed,
+                "test_rows_reused": test_resumed,
+                "measurement_sessions": sorted(
+                    {row["measurement_session"] for row in measured_batches}
+                ),
+                "timing_scope": "Observed batches on the declared GPU type; may span resumed sessions, not a single uninterrupted process",
+            },
             "system": system,
             "adapter": str(adapter) if adapter else None,
             "adapter_fingerprint": fingerprint,

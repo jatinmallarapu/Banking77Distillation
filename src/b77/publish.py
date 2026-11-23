@@ -244,6 +244,9 @@ def model_card(evidence: dict, adapter: bool) -> str:
         "Batch-32 timings, calibration, abstention coverage, token counts, cost assumptions "
         "and per-seed mean/standard deviation are preserved in release_evidence.json. "
         "A zero GPU price denotes free compute, not a production hosting quote.",
+        "Evaluation may resume across sessions on the declared GPU type. Reports record "
+        "reused rows and measurement-session IDs; timings are observed batch samples, "
+        "not a claim of one uninterrupted run or dedicated production hardware.",
         "",
         "## Guardrails and limitations",
         "",
