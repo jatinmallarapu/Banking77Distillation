@@ -1,0 +1,47 @@
+{
+  "status": "training_complete_evaluation_pending_not_released",
+  "scope": "v0.1_single_seed_pilot200",
+  "teacher": {
+    "sources": 200,
+    "proposed": 600,
+    "unique_kept": 480,
+    "keep_rate": 0.8,
+    "filter": "three_votes_must_match_source_gold_label"
+  },
+  "students": {
+    "a": {
+      "status": "trained",
+      "seed": 1,
+      "train_rows": 8992,
+      "validation_rows": 1000,
+      "best_validation_loss": 0.05590859800577164,
+      "best_checkpoint": "checkpoints/student_a/1/checkpoint-1686",
+      "gpu": "Tesla T4",
+      "adapter_safetensors_bytes": 35237104
+    },
+    "b": {
+      "status": "trained",
+      "seed": 1,
+      "train_rows": 9472,
+      "validation_rows": 1000,
+      "best_validation_loss": 0.053346775472164154,
+      "best_checkpoint": "checkpoints/student_b/1/checkpoint-1184",
+      "gpu": "Tesla T4",
+      "adapter_safetensors_bytes": 35237104
+    }
+  },
+  "recovery": {
+    "repository": "JatinMallarapu/Banking77TrainingCheckpoints",
+    "commit": "895b0203a0cc6921fd0cfdcab8c3b2e871743927",
+    "archive_sha256": "201be6c7d9b882234ed08468500a214ac5341442447f6885f9f8ad56d327930b",
+    "archive_bytes": 75276323,
+    "status": "restored_verified_private_backup"
+  },
+  "available_complete_gpu_evaluation_reports": [],
+  "limitations": [
+    "Validation loss is not test accuracy or evidence that distillation improves routing quality.",
+    "No seed variance can be estimated from one seed.",
+    "Teacher agreement is not human verification.",
+    "Colab GPU usage limits interrupted evaluation; public publication remains pending."
+  ]
+}

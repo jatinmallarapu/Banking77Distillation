@@ -23,16 +23,27 @@ for the reduced v0.1 release. No GPU results below are implied by runner availab
 
 An earlier Kaggle session trained two gold-only seeds but stopped before a
 verified external backup. Those checkpoints are not treated as current release
-artifacts. The retry uses verified private checkpoints and a foreground committed
-job. [Pilot execution and recovery](docs/PILOT_RELEASE.md).
+artifacts. The Colab retry uses verified private checkpoints and a foreground
+runner. [Single-GPU execution and recovery](docs/COLAB_PILOT.md).
 
 | System | Status | Test accuracy, 95% CI | Test macro-F1, 95% CI |
 | --- | --- | --- | --- |
 | TF-IDF + logistic regression | **Measured, CPU** | **88.67% [87.61, 89.81]** | **88.71% [87.62, 89.85]** |
 | Zero-shot Qwen2.5-7B AWQ | Runner implemented; unrun | — | — |
 | Retrieval few-shot Qwen2.5-7B AWQ | Runner implemented; unrun | — | — |
-| Student A · gold only, three seeds | Pilot rerun and final evaluation pending | — | — |
-| Student B · gold + distilled, three seeds | Training/evaluation code; unrun | — | — |
+| Student A · gold only, seed 1 | **Trained; adapter recovered. Test evaluation pending** | — | — |
+| Student B · gold + pilot paraphrases, seed 1 | **Trained; adapter recovered. Test evaluation pending** | — | — |
+
+**Current v0.1 training evidence:** the teacher retained **480/600 paraphrases (80%)**
+from the balanced 200-source subset. Student A trained on 8,992 gold rows; Student B
+trained on 9,472 rows including the accepted paraphrases. Their best validation losses
+were **0.0559085980** and **0.0533467755**, respectively. Validation loss is not test
+accuracy and does not establish that distillation improved routing quality.
+
+Both adapters were recovered from a checksum-verified private backup after Colab
+disconnected. Colab currently refuses GPU allocation due to usage limits. No complete
+GPU evaluation reports were recovered; evaluation, release and anonymous inference
+verification remain pending. [Recovered training evidence](evals/results/training-pilot-v01.json).
 
 **Historical teacher-data pilot (interrupted run):** retained **478/600 paraphrases (79.67%)** from 200 training
 queries covering all 77 intents, in **21.79 minutes** on one T4. Three seeded votes
