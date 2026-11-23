@@ -29,6 +29,7 @@ def main() -> None:
     gpu.add_argument("--batch-size", type=int, choices=[1, 32], default=1)
     gpu.add_argument("--gpu-hourly-price", type=float, required=True)
     gpu.add_argument("--final-test", action="store_true")
+    gpu.add_argument("--teacher-backend", choices=["vllm", "local-awq"], default="vllm")
     args = parser.parse_args()
     if args.command == "prepare":
         from .data import prepare
@@ -60,7 +61,12 @@ def main() -> None:
         from .evaluate import gpu_evaluate
 
         result = gpu_evaluate(
-            args.system, args.adapter, args.batch_size, args.gpu_hourly_price, args.final_test
+            args.system,
+            args.adapter,
+            args.batch_size,
+            args.gpu_hourly_price,
+            args.final_test,
+            args.teacher_backend,
         )
     print(json.dumps(result, indent=2))
 

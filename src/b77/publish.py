@@ -15,7 +15,7 @@ from .data import digest, read_rows
 from .release import readiness
 from .repro import adapter_fingerprint, file_fingerprint
 from .prompts import STUDENT_SYSTEM
-from .teacher import validate_distilled
+from .teacher import ordered_sources, validate_distilled
 
 NAMESPACE = "JatinMallarapu"
 REPOSITORIES = {
@@ -55,19 +55,23 @@ def release_evidence(root: Path) -> dict:
     identity = digest(
         {"config": config, "train": train, "excluded_ids": [r["id"] for r in validation + test]}
     )
+    budget = config.get("source_limit", len(train))
+    if not isinstance(budget, int) or not 1 <= budget <= len(train):
+        raise ValueError("Invalid declared teacher source budget")
+    expected_sources = ordered_sources(train)[:budget]
     if (
         len(test) != 3080
         or len(labels) != 77
         or not distilled
-        or set(progress["completed_sources"]) != {r["id"] for r in train}
-        or len(progress["completed_sources"]) != len(train)
+        or set(progress["completed_sources"]) != {r["id"] for r in expected_sources}
+        or len(progress["completed_sources"]) != len(expected_sources)
         or progress["identity"] != identity
         or progress["unique_kept"] != len(distilled)
-        or progress["proposed"] != 3 * len(train)
+        or progress["proposed"] != 3 * len(expected_sources)
         or not math.isclose(progress["keep_rate"], len(distilled) / progress["proposed"])
         or any(r.get("protocol") != config["distillation_protocol"] for r in distilled)
     ):
-        raise ValueError("Full, matching teacher data is required; a pilot cannot be released")
+        raise ValueError("Matching teacher data for the declared source budget is required")
     validate_distilled(distilled, train, validation + test, names=labels)
     reports = {}
     for system in ["zeroshot", "fewshot"] + [
@@ -137,6 +141,8 @@ def release_evidence(root: Path) -> dict:
         "distilled_sha256": digest(distilled),
         "training_manifests": manifests,
         "teacher_config": config,
+        "gold_training_rows": len(train),
+        "teacher_source_budget": budget,
         "injections": injections,
     }
 
@@ -179,6 +185,11 @@ def model_card(evidence: dict, adapter: bool) -> str:
         "gold label; verification uses training-only retrieval excluding the source ID. "
         "Exact duplicate and validation/test overlap checks are applied. "
         "Teacher agreement is not human verification.",
+        "",
+        f"Scope: {evidence['teacher_config'].get('study_scope', 'full')}. Teacher rewrites cover "
+        f"{len(evidence['teacher_progress']['completed_sources'])} intent-balanced training sources. "
+        f"Both students retain all {evidence['gold_training_rows']} gold training rows. "
+        "A pilot release does not complete the larger all-source distillation study.",
         "",
         f"Accepted {evidence['teacher_progress']['unique_kept']} of "
         f"{evidence['teacher_progress']['proposed']} proposals. "

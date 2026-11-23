@@ -143,10 +143,38 @@ def test_modified_adapter_invalidates_its_eval(evidence_files):
         release_evidence(evidence_files)
 
 
-def test_teacher_pilot_cannot_stand_in_for_complete_generation(evidence_files):
+def test_partial_teacher_run_cannot_meet_declared_budget(evidence_files):
     path = evidence_files / "runs/distill-progress.json"
     progress = json.loads(path.read_text())
     progress["completed_sources"] = progress["completed_sources"][:1]
     path.write_text(json.dumps(progress))
-    with pytest.raises(ValueError, match="pilot cannot be released"):
+    with pytest.raises(ValueError, match="declared source budget"):
         release_evidence(evidence_files)
+
+
+def test_declared_teacher_budget_keeps_all_gold_training(evidence_files):
+    import yaml
+
+    from b77.data import digest, read_rows
+
+    root = evidence_files
+    config_path = root / "configs/teacher.yaml"
+    config = yaml.safe_load(config_path.read_text())
+    config["source_limit"] = 1
+    config_path.write_text(yaml.safe_dump(config))
+    train = read_rows(root / "data/prepared/train.jsonl")
+    excluded = read_rows(root / "data/prepared/validation.jsonl") + read_rows(
+        root / "data/prepared/test.jsonl"
+    )
+    progress_path = root / "runs/distill-progress.json"
+    progress = json.loads(progress_path.read_text())
+    progress["completed_sources"] = [train[0]["id"]]
+    progress["proposed"] = 3
+    progress["keep_rate"] = progress["unique_kept"] / 3
+    progress["identity"] = digest(
+        {"config": config, "train": train, "excluded_ids": [r["id"] for r in excluded]}
+    )
+    progress_path.write_text(json.dumps(progress))
+    evidence = release_evidence(root)
+    assert evidence["teacher_source_budget"] == 1
+    assert evidence["gold_training_rows"] == len(train)

@@ -78,7 +78,14 @@ def test_generated_cards_use_matching_library_and_valid_example():
         },
         "tfidf_cpu_reference": fixture_report,
         "reports": {"student_b-seed1-batch1": fixture_report},
-        "teacher_progress": {"unique_kept": 2, "proposed": 3, "keep_rate": 2 / 3},
+        "teacher_progress": {
+            "unique_kept": 2,
+            "proposed": 3,
+            "keep_rate": 2 / 3,
+            "completed_sources": ["fixture"],
+        },
+        "teacher_config": {"study_scope": "fixture"},
+        "gold_training_rows": 10,
     }
     for adapter, library in [(False, "transformers"), (True, "peft")]:
         card = model_card(evidence, adapter)

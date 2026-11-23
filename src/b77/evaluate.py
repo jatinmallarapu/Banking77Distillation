@@ -10,11 +10,16 @@ from .data import digest, read_rows, write_rows
 from .guardrails import mask
 from .metrics import choose_threshold, evaluate
 from .repro import adapter_fingerprint
-from .scoring import RemoteScorer, StudentScorer, fit_temperature, softmax
+from .scoring import LocalAWQTeacherScorer, RemoteScorer, StudentScorer, fit_temperature, softmax
 
 
 def gpu_evaluate(
-    system: str, adapter: Path | None, batch_size: int, price: float, final: bool = False
+    system: str,
+    adapter: Path | None,
+    batch_size: int,
+    price: float,
+    final: bool = False,
+    teacher_backend: str = "vllm",
 ) -> dict:
     import torch
 
@@ -29,10 +34,14 @@ def gpu_evaluate(
     test = read_rows(Path("data/prepared/test.jsonl"))
     labels = json.loads(Path("data/labels.json").read_text())
     fingerprint = adapter_fingerprint(adapter) if adapter is not None else None
+    if teacher_backend not in {"vllm", "local-awq"}:
+        raise ValueError("Unknown teacher scoring backend")
     scorer = (
         StudentScorer(adapter)
         if adapter is not None
-        else RemoteScorer(train, fewshot=system == "fewshot")
+        else (LocalAWQTeacherScorer if teacher_backend == "local-awq" else RemoteScorer)(
+            train, fewshot=system == "fewshot"
+        )
     )
     score_parts = []
     for offset in range(0, len(validation), batch_size):
@@ -90,6 +99,10 @@ def gpu_evaluate(
                 else "remote_vllm",
                 "batch_size": batch_size,
             },
+            "scoring_backend": "transformers-peft-kv-cache" if adapter else teacher_backend,
+            "internal_query_microbatch": getattr(scorer, "query_microbatch", batch_size),
+            "candidate_label_batch": getattr(scorer, "label_batch_size", 16),
+            "candidate_cache_token_budget": getattr(scorer, "cache_budget_tokens", None),
             "tokens": total_tokens,
             "elapsed_inference_seconds": elapsed_total,
             "gpu_hourly_price_assumption": price,

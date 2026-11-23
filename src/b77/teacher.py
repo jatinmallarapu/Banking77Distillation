@@ -117,6 +117,20 @@ class Retriever:
         return [self.rows[index] for index in np.argsort(-scores, kind="stable")[:k]]
 
 
+def ordered_sources(train: list[dict]) -> list[dict]:
+    """Balance a finite teacher budget across intents before taking the prefix."""
+    grouped = [
+        [row for row in train if row["label"] == label]
+        for label in sorted({r["label"] for r in train})
+    ]
+    return [
+        group[index]
+        for index in range(max(map(len, grouped)))
+        for group in grouped
+        if index < len(group)
+    ]
+
+
 def distill(limit: int | None = None, workers: int = 1, partition: Path | None = None) -> dict:
     if not 1 <= workers <= 64:
         raise ValueError("Use between 1 and 64 teacher workers")
@@ -146,17 +160,14 @@ def distill(limit: int | None = None, workers: int = 1, partition: Path | None =
     metadata["identity"] = identity
     seen = {normalize(mask(row["text"])) for row in train + excluded + kept}
     retriever = Retriever(train)
-    grouped = [
-        [row for row in train if row["label"] == label]
-        for label in sorted({r["label"] for r in train})
-    ]
-    # Round-robin labels: a short pilot must not be an all-card-arrival prefix.
-    ordered = [
-        group[index]
-        for index in range(max(map(len, grouped)))
-        for group in grouped
-        if index < len(group)
-    ]
+    configured_limit = teacher.config.get("source_limit")
+    if limit is None:
+        limit = configured_limit
+    if configured_limit is not None and (
+        not 1 <= configured_limit <= len(train) or (limit is not None and limit > configured_limit)
+    ):
+        raise ValueError("Teacher source limit exceeds the declared experiment budget")
+    ordered = ordered_sources(train)
     assignment = json.loads(partition.read_text()) if partition is not None else None
     if assignment is not None:
         count, index = assignment["count"], assignment["index"]

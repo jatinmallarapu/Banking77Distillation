@@ -6,3 +6,7 @@ agreement_votes: 3
 distillation_protocol: intent_preserving_retrieval_v2
 few_shot_neighbors: 10
 # Exact vLLM 0.8.5.post1 uses guided_choice; newer versions require an API migration.
+
+# First public model: bounded, intent-balanced teacher data; the full study is future work.
+study_scope: pilot200
+source_limit: 200

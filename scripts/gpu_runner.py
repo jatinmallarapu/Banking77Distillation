@@ -60,6 +60,8 @@ def main() -> None:
                     "4096",
                     "--gpu-memory-utilization",
                     "0.85",
+                    "--swap-space",
+                    "0",
                     "--enable-prefix-caching",
                     "--disable-log-requests",
                 ],

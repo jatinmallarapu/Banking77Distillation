@@ -1,4 +1,4 @@
-"""Score only the 77 allowed label sequences; confidence is normalized sequence likelihood."""
+"""Score complete allowed label sequences with shared query caches and validation calibration."""
 
 import json
 from pathlib import Path
@@ -94,6 +94,13 @@ class RemoteScorer:
 
 
 class StudentScorer:
+    label_batch_size = 16
+    query_microbatch = 32
+    cache_budget_tokens = 65536
+
+    def messages(self, text: str) -> list[dict]:
+        return student_messages(text)
+
     def __init__(self, adapter: Path) -> None:
         import torch
         from peft import PeftModel
@@ -120,7 +127,7 @@ class StudentScorer:
         starts = []
         for text in texts:
             prefix = self.tokenizer.apply_chat_template(
-                student_messages(text), tokenize=True, add_generation_prompt=True
+                self.messages(text), tokenize=True, add_generation_prompt=True
             )
             for label in self.labels:
                 sequences.append(
@@ -162,9 +169,17 @@ class StudentScorer:
 
         import torch
 
+        if len(texts) > self.query_microbatch:
+            pieces = [
+                self.score(texts[i : i + self.query_microbatch])
+                for i in range(0, len(texts), self.query_microbatch)
+            ]
+            return np.concatenate([p[0] for p in pieces]), {
+                key: sum(p[1][key] for p in pieces) for key in ["input_tokens", "output_tokens"]
+            }
         prefixes = [
             self.tokenizer.apply_chat_template(
-                student_messages(text), tokenize=True, add_generation_prompt=True
+                self.messages(text), tokenize=True, add_generation_prompt=True
             )
             for text in texts
         ]
@@ -180,7 +195,10 @@ class StudentScorer:
             [[0] * (width - len(p)) + [1] * len(p) for p in prefixes], device="cuda"
         )
         positions = (attention.cumsum(-1) - 1).clamp(min=0)
-        scores = np.empty((len(texts), len(labels)))
+        scores = torch.empty((len(texts), len(labels)), device="cuda")
+        label_group = min(
+            self.label_batch_size, max(1, self.cache_budget_tokens // (len(texts) * width))
+        )
         with torch.inference_mode():
             output = self.model(
                 input_ids=ids,
@@ -190,8 +208,8 @@ class StudentScorer:
                 logits_to_keep=1,
             )
             first = torch.log_softmax(output.logits[:, -1].float(), dim=-1)
-            for offset in range(0, len(labels), 16):
-                batch = labels[offset : offset + 16]
+            for offset in range(0, len(labels), label_group):
+                batch = labels[offset : offset + label_group]
                 size = max(len(row) - 1 for row in batch)
                 # Query-major order matches repeat_interleave of the query KV states.
                 expanded_rows = [row for _ in texts for row in batch]
@@ -222,15 +240,61 @@ class StudentScorer:
                     past_key_values=cache,
                     use_cache=True,
                 ).logits
-                for index, row in enumerate(expanded_rows):
-                    distribution = torch.log_softmax(logits[index, : len(row) - 1].float(), dim=-1)
-                    targets = torch.tensor(row[1:], device="cuda")
-                    query = index // len(batch)
-                    score = first[query, row[0]] + distribution.gather(1, targets[:, None]).sum()
-                    scores[query, offset + index % len(batch)] = score.item()
+                targets = torch.tensor(
+                    [
+                        row[1:] + [self.tokenizer.pad_token_id] * (size - len(row) + 1)
+                        for row in expanded_rows
+                    ],
+                    device="cuda",
+                )
+                # Reduce all candidates together rather than synchronizing once per label.
+                selected = logits.gather(2, targets[:, :, None]).squeeze(-1).float()
+                log_normalizer = torch.logsumexp(logits.float(), dim=-1)
+                suffix_scores = ((selected - log_normalizer) * suffix_attention).sum(-1)
+                query_indices = torch.arange(len(texts), device="cuda").repeat_interleave(
+                    len(batch)
+                )
+                first_tokens = torch.tensor([row[0] for row in expanded_rows], device="cuda")
+                values = first[query_indices, first_tokens] + suffix_scores
+                scores[:, offset : offset + len(batch)] = values.reshape(len(texts), len(batch))
                 del cache, logits
         torch.cuda.synchronize()
-        return scores, {
+        return scores.cpu().numpy(), {
             "input_tokens": sum(map(len, prefixes)),
             "output_tokens": len(texts) * sum(map(len, labels)),
         }
+
+
+class LocalAWQTeacherScorer(StudentScorer):
+    """Use the same pinned AWQ weights with query KV reuse instead of repeated HTTP prefill."""
+
+    label_batch_size = 77
+    query_microbatch = 1
+    cache_budget_tokens = 100000
+
+    def __init__(self, training: list[dict], fewshot: bool = False) -> None:
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+
+        if not torch.cuda.is_available():
+            raise RuntimeError("The AWQ teacher benchmark requires an already allocated GPU")
+        self.config = yaml.safe_load(Path("configs/teacher.yaml").read_text())
+        self.labels = json.loads(Path("data/labels.json").read_text())
+        self.fewshot = fewshot
+        self.retriever = Retriever(training)
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            self.config["model"], revision=self.config["revision"], trust_remote_code=False
+        )
+        self.tokenizer.pad_token = self.tokenizer.eos_token
+        self.model = AutoModelForCausalLM.from_pretrained(
+            self.config["model"],
+            revision=self.config["revision"],
+            torch_dtype=torch.float16,
+            device_map={"": "cuda"},
+            trust_remote_code=False,
+            attn_implementation="sdpa",
+        ).eval()
+
+    def messages(self, text: str) -> list[dict]:
+        examples = self.retriever.neighbors(text) if self.fewshot else None
+        return teacher_messages(text, self.labels, examples)
