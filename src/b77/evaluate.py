@@ -9,6 +9,7 @@ import numpy as np
 from .data import digest, read_rows, write_rows
 from .guardrails import mask
 from .metrics import choose_threshold, evaluate
+from .repro import adapter_fingerprint
 from .scoring import RemoteScorer, StudentScorer, fit_temperature, softmax
 
 
@@ -27,6 +28,7 @@ def gpu_evaluate(
     validation = read_rows(Path("data/prepared/validation.jsonl"))
     test = read_rows(Path("data/prepared/test.jsonl"))
     labels = json.loads(Path("data/labels.json").read_text())
+    fingerprint = adapter_fingerprint(adapter) if adapter is not None else None
     scorer = (
         StudentScorer(adapter)
         if adapter is not None
@@ -70,12 +72,15 @@ def gpu_evaluate(
             )
         for key in total_tokens:
             total_tokens[key] += usage[key]
+    if adapter is not None and fingerprint != adapter_fingerprint(adapter):
+        raise ValueError("Adapter files changed during evaluation; no report was published")
     report = evaluate(test, np.array(probabilities), labels, threshold["threshold"], latencies)
     report.update(
         {
             "status": "measured",
             "system": system,
             "adapter": str(adapter) if adapter else None,
+            "adapter_fingerprint": fingerprint,
             "case_sha256": digest(test),
             "temperature": temperature,
             "abstention_selection": threshold,

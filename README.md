@@ -5,7 +5,7 @@
 [![Data: CC BY 4.0](https://img.shields.io/badge/data-CC_BY_4.0-146d7f.svg)](ATTRIBUTION.md)
 
 **When is prompting not enough?** A reproducible experiment for comparing prompting,
-fine-tuning and distillation in customer-intent routingâ€”starting with a measured
+fine-tuning and distillation in customer-intent routing—starting with a measured
 CPU reference and recording GPU execution status explicitly.
 
 ## Results and execution status
@@ -18,10 +18,10 @@ Hugging Face release is claimed. See the [teacher investigation](docs/TEACHER_AU
 | System | Status | Test accuracy, 95% CI | Test macro-F1, 95% CI |
 | --- | --- | --- | --- |
 | TF-IDF + logistic regression | **Measured, CPU** | **88.67% [87.61, 89.81]** | **88.71% [87.62, 89.85]** |
-| Zero-shot Qwen2.5-7B AWQ | Runner implemented; unrun | â€” | â€” |
-| Retrieval few-shot Qwen2.5-7B AWQ | Runner implemented; unrun | â€” | â€” |
-| Student A Â· gold only, three seeds | Training/evaluation code; unrun | â€” | â€” |
-| Student B Â· gold + distilled, three seeds | Training/evaluation code; unrun | â€” | â€” |
+| Zero-shot Qwen2.5-7B AWQ | Runner implemented; unrun | — | — |
+| Retrieval few-shot Qwen2.5-7B AWQ | Runner implemented; unrun | — | — |
+| Student A · gold only, three seeds | Training/evaluation code; unrun | — | — |
+| Student B · gold + distilled, three seeds | Training/evaluation code; unrun | — | — |
 
 **Teacher-data pilot:** retained **478/600 paraphrases (79.67%)** from 200 training
 queries covering all 77 intents, in **21.79 minutes** on one T4. Three seeded votes
@@ -61,14 +61,14 @@ decision must wait for the predeclared GPU runs.
 
 ```mermaid
 flowchart LR
-  D[Banking77 Â· pinned Parquet revision] --> S[Deduplicate + stratified train / validation]
+  D[Banking77 · pinned Parquet revision] --> S[Deduplicate + stratified train / validation]
   S --> B[Measured TF-IDF reference]
-  S --> T[Qwen 7B Â· training-only paraphrases]
+  S --> T[Qwen 7B · training-only paraphrases]
   T --> F[Three votes agree with source gold + leakage filter]
-  S --> A[Student A Â· gold only]
-  F --> C[Student B Â· gold + distilled]
+  S --> A[Student A · gold only]
+  F --> C[Student B · gold + distilled]
   A & C --> V[Validation checkpoint / temperature / abstention]
-  B & V --> E[Fixed test Â· quality / calibration / latency / cost]
+  B & V --> E[Fixed test · quality / calibration / latency / cost]
   E --> G[300-case CI gate + live consistency check]
   B --> API[FastAPI CPU /classify service]
   C -. future, not published .-> H[Local merged weights / adapter / model card]
@@ -158,7 +158,7 @@ labels, not wrong allowed labels or injection success.
 
 The 50 authored injection pairs cross five clean prompts with ten override
 wrappers. Their measured paired-change rate is a narrow regression result, not a
-claim of comprehensive security. [Attack pairs](evals/injection_set.jsonl) Â·
+claim of comprehensive security. [Attack pairs](evals/injection_set.jsonl) ·
 [Measured outcomes](evals/results/tfidf-injections.json)
 
 Every PR rebuilds the baseline and scores the gate. CI blocks a macro-F1 decline
@@ -174,17 +174,19 @@ uploads never run in CI. Baseline changes must be reviewed separately.
 | 100 users | 902 | 0 | 112.2 | 110 / 340 ms |
 
 These are short ten-second, loopback tests with think time, a ramp and shared
-client/server CPUâ€”not sustained capacity benchmarks. [Raw CSV and configuration](benchmarks/results.json).
+client/server CPU—not sustained capacity benchmarks. [Raw CSV and configuration](benchmarks/results.json).
 The Locust file adapts the request pattern from LanguageModelInferenceBenchmark.
 
 ## Model release status
 
 **No Hugging Face model has been published.** The planned name is
-`jatinmallarapu/qwen2.5-0.5b-banking77-distill`, with a separate adapter and filtered
-dataset after training, evaluation and owner review. No working model link is
+`JatinMallarapu/qwen2.5-0.5b-banking77-distill`, with a separate adapter and filtered
+dataset after complete training and evaluation. No working model link is
 implied. [MODEL_CARD.md](MODEL_CARD.md) is explicitly a preparation card.
 `python -m b77.release` refuses missing or smoke-only runs; `--merge` is a local
-operation after readiness checks. No upload or publication function is implemented.
+operation after readiness checks. The gated publisher and anonymous verification
+commands are documented in [PUBLICATION.md](docs/PUBLICATION.md); they do not make
+the model released until the actual upload and verification pass.
 
 ## Files worth reviewing
 
@@ -194,7 +196,7 @@ operation after readiness checks. No upload or publication function is implement
 | `baselines.py`, `metrics.py`, `gate.py` | Fitted baseline, uncertainty and regression checks |
 | `teacher.py`, `train_student.py`, `scoring.py` | Filtering, LoRA and constrained likelihood evaluation |
 | `guardrails.py`, `serve.py` | Masking, bounded schemas and serving |
-| `release.py`, `MODEL_CARD.md` | Local-only release readiness and honest provenance |
+| `release.py`, `publish.py`, `verify_public.py` | Evidence gates, merge, public upload and anonymous verification |
 | `evals/results/` | Measured, redacted CPU evidence |
 
 ## Attribution and limitations

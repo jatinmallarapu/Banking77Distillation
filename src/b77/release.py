@@ -1,10 +1,12 @@
-"""Prepare a local release only after six complete runs; there is no upload operation."""
+"""Merge completed runs locally; publication is handled by the separate evidence gate."""
 
 import argparse
 import json
 from pathlib import Path
 
 import numpy as np
+
+from .repro import adapter_fingerprint, file_fingerprint
 
 
 def readiness(root: Path = Path(".")) -> dict:
@@ -89,7 +91,7 @@ def main() -> None:
             "---\nlanguage: en\nlicense: apache-2.0\nbase_model: Qwen/Qwen2.5-0.5B-Instruct\n"
             "datasets:\n  - PolyAI/banking77\npipeline_tag: text-generation\n---\n\n"
             "# Banking77 distilled student — local release candidate\n\n"
-            "Trained locally; NOT PUBLISHED. Owner review is required before any Hub upload.\n\n"
+            "Local merge candidate; NOT PUBLISHED. b77.publish validates complete evidence before upload.\n\n"
             "English intent routing among 77 Banking77 labels. Not suitable for banking decisions, "
             "payment execution, fraud determination, or unreviewed real-customer deployment. "
             "Regex masking and a finite label set do not prove privacy or injection resistance.\n\n"
@@ -108,7 +110,12 @@ def main() -> None:
         license_path = hf_hub_download(config["base_model"], "LICENSE", revision=config["revision"])
         shutil.copy2(license_path, out / "merged/LICENSE")
         shutil.copy2("ATTRIBUTION.md", out / "merged/ATTRIBUTION.md")
-        shutil.copytree(adapter, out / "adapter", dirs_exist_ok=True)
+        shutil.copytree(
+            adapter,
+            out / "adapter",
+            dirs_exist_ok=True,
+            ignore=shutil.ignore_patterns("training_args.bin", "optimizer.pt", "scheduler.pt"),
+        )
         (out / "adapter/README.md").write_text(card)
         shutil.copy2(license_path, out / "adapter/LICENSE")
         shutil.copy2("ATTRIBUTION.md", out / "adapter/ATTRIBUTION.md")
@@ -119,6 +126,12 @@ def main() -> None:
             "---\nlicense: cc-by-4.0\nlanguage: en\n---\n# Filtered training paraphrases\n\nAdapted from PolyAI Banking77 training queries with Qwen teacher paraphrases and three-vote agreement filtering. Not human-verified. Preserve ATTRIBUTION.md. Validation and test sources are excluded.\n"
         )
         shutil.copy2("ATTRIBUTION.md", dataset / "ATTRIBUTION.md")
+        report["selected_adapter_fingerprint"] = adapter_fingerprint(adapter)
+        report["base_model"] = config["base_model"]
+        report["base_revision"] = config["revision"]
+        report["merged_weights_sha256"] = {
+            path.name: file_fingerprint(path) for path in (out / "merged").glob("*.safetensors")
+        }
     (out / "release_manifest.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))
 

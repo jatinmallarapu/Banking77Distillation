@@ -11,7 +11,7 @@ tags:
   - distillation
 ---
 
-# Banking77 Distill â€” release preparation card
+# Banking77 Distill — release preparation card
 
 **Status: NOT TRAINED / NOT PUBLISHED.** This is a repository-side preparation
 card, not evidence of a Hugging Face model release. GPU execution is underway;
@@ -41,7 +41,7 @@ checks are required. Keep rate: **not measured**.
 ## Measured results
 
 The GitHub CPU baseline report is a TF-IDF/logistic model, not this Qwen model.
-Qwen quality, bootstrap intervals, three-seed mean Â± standard deviation, calibration,
+Qwen quality, bootstrap intervals, three-seed mean ± standard deviation, calibration,
 GPU latency, cost and injection robustness: **not measured**. Fill them only from
 completed, hash-matched GPU reports. A smoke training run is not releaseable.
 
@@ -66,6 +66,6 @@ actual Qwen guardrail results are available in this preparation release.
 Base model: Apache 2.0, Qwen team / Alibaba Cloud. Training data: PolyAI Banking77,
 CC BY 4.0; see `ATTRIBUTION.md` for the paper, pinned source and modifications.
 Future adapted-data publication must retain attribution. Planned repository name:
-`jatinmallarapu/qwen2.5-0.5b-banking77-distill`; no public repository or weights are
-claimed to exist. The separate adapter and filtered data remain local until the
-owner explicitly authorizes publication after reviewing the completed results.
+`JatinMallarapu/qwen2.5-0.5b-banking77-distill`; no public repository or weights are
+claimed to exist. Publication is authorized for the two model repositories but
+remains gated on complete training, evaluation and anonymous verification.

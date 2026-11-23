@@ -220,9 +220,12 @@ def distill(limit: int | None = None, workers: int = 1) -> dict:
     return {**metadata, "source_ids_verified": all(row["source_id"] in source for row in kept)}
 
 
-def validate_distilled(rows: list[dict], train: list[dict], excluded: list[dict]) -> None:
+def validate_distilled(
+    rows: list[dict], train: list[dict], excluded: list[dict], names: list[str] | None = None
+) -> None:
     source = {row["id"]: row["label"] for row in train}
-    names = json.loads(Path("data/labels.json").read_text())
+    if names is None:
+        names = json.loads(Path("data/labels.json").read_text())
     if any(
         row["source_id"] not in source
         or row["label"] != source[row["source_id"]]
