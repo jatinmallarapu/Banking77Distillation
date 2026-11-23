@@ -1,0 +1,32 @@
+{
+  "dataset": "PolyAI/banking77",
+  "revision": "1846984189f2bc0ac51c6fc3a600fa9e1714e0c6",
+  "license": "CC-BY-4.0",
+  "official_counts": {
+    "train": 10003,
+    "test": 3080
+  },
+  "prepared_counts": {
+    "train": 8992,
+    "validation": 1000,
+    "test": 3080
+  },
+  "quarantined_training_ids": [
+    "train-01290",
+    "train-01722",
+    "train-01724",
+    "train-03103",
+    "train-03116",
+    "train-04476",
+    "train-04576",
+    "train-04595",
+    "train-06965",
+    "train-06984",
+    "train-09921"
+  ],
+  "gate_sha256": "66562a25b569ed4aec37fc272733dd63fb0be728dc4c61a7fd894f72b62e21d9",
+  "split_seed": 42,
+  "labels_sha256": "968318db56ec61eeec842a13dc6def991d9a820088553beb6440d544bdf69307",
+  "train_sha256": "3a9a1884be83fc6acdd75024ca509c8041854db9d29ac41266d3922ca3ae5e39",
+  "validation_sha256": "15d3fdf6dde8f405feec0b1341c482a951653a1010cd46ffdcfc901f1c628547"
+}

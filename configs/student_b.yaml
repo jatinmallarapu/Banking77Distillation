@@ -1,0 +1,13 @@
+name: student_b
+base_model: Qwen/Qwen2.5-0.5B-Instruct
+revision: 7ae557604adf67be50417f59c2c2f167def9a775
+distilled: true
+seeds: [17, 42, 73]
+epochs: 3
+learning_rate: 0.0002
+max_length: 128
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.05
+batch_size: 4
+gradient_accumulation_steps: 4
