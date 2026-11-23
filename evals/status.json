@@ -1,10 +1,10 @@
 {
   "tfidf_baseline": "measured_on_official_test",
-  "teacher_zero_shot": "evaluation_interrupted_no_complete_report_recovered",
+  "teacher_zero_shot": "running_on_free_kaggle_t4_pair_with_verified_score_checkpoints",
   "teacher_few_shot": "not_run",
   "teacher_distillation_keep_rate": 0.8,
   "student_a_seeds": {
-    "1": "trained_adapter_recovered_and_verified",
+    "1": "trained_and_measured_on_all_3080_official_test_queries",
     "2": "future_work_not_run_in_v01",
     "3": "future_work_not_run_in_v01"
   },
@@ -13,7 +13,7 @@
     "2": "future_work_not_run_in_v01",
     "3": "future_work_not_run_in_v01"
   },
-  "gpu_latency_cost_comparisons": "not_measured",
+  "gpu_latency_cost_comparisons": "partial_measured_student_a_batch1_remaining_systems_running",
   "hugging_face_publication": "pending_complete_gpu_evaluation_and_anonymous_verification",
   "paid_compute": "not_authorized_or_used",
   "gpu_smoke": "passed_two_steps_not_releaseable",
@@ -28,7 +28,7 @@
   },
   "hugging_face_namespace": "JatinMallarapu",
   "hugging_face_authentication": "verified_without_logging_credentials",
-  "status_note": "Training completion verified after restoring private checkpoint commit 895b0203a0cc6921fd0cfdcab8c3b2e871743927. Colab GPU usage limits block further GPU work. No complete GPU evaluation reports recovered.",
+  "status_note": "Student A full-test report recovered from verified private backup 1eaae828c27f78c922baf309d5bf554279aa2e57. Teacher and Student B evaluations continue on free Kaggle T4 GPUs. Publication remains pending.",
   "study_scope": "v0.1_single_seed_pilot200_full_gold",
   "teacher_source_budget": 200,
   "private_checkpoint_repository": "JatinMallarapu/Banking77TrainingCheckpoints",
@@ -43,5 +43,9 @@
     "unique_kept": 480,
     "keep_rate": 0.8,
     "report": "evals/results/training-pilot-v01.json"
-  }
+  },
+  "evaluation_batch_sizes": [
+    1
+  ],
+  "batch32_scaling": "future_work_for_v01"
 }
