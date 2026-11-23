@@ -7,6 +7,15 @@ import httpx
 from b77.teacher import Teacher
 
 
+def test_local_teacher_omits_empty_authorization(monkeypatch):
+    monkeypatch.delenv("TEACHER_API_KEY", raising=False)
+    teacher = Teacher()
+    try:
+        assert "authorization" not in teacher.client.headers
+    finally:
+        teacher.client.close()
+
+
 def test_choice_contract_and_query_redaction():
     teacher = Teacher()
 

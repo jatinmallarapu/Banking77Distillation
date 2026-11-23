@@ -20,7 +20,11 @@ class Teacher:
         self.labels = json.loads(Path("data/labels.json").read_text())
         self.client = httpx.Client(
             base_url=os.getenv("TEACHER_BASE_URL", "http://127.0.0.1:8001/v1").rstrip("/"),
-            headers={"Authorization": "Bearer " + os.getenv("TEACHER_API_KEY", "")},
+            headers=(
+                {"Authorization": "Bearer " + os.environ["TEACHER_API_KEY"]}
+                if os.getenv("TEACHER_API_KEY")
+                else {}
+            ),
             timeout=120,
         )
 
