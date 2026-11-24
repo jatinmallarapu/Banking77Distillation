@@ -92,6 +92,7 @@ def test_generated_cards_use_matching_library_and_valid_example():
         assert yaml.safe_load(card.split("---", 2)[1])["library_name"] == library
         example = card.split("```python\n", 1)[1].split("```", 1)[0]
         ast.parse(example)
+        assert "import torch" in example
         assert "token=False" in example and "JatinMallarapu/" in example
 
 

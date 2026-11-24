@@ -293,6 +293,7 @@ def model_card(evidence: dict, adapter: bool) -> str:
     ]
     usage = [
         "```python",
+        "import torch",
         "from transformers import AutoModelForCausalLM, AutoTokenizer",
         f"repo = '{NAMESPACE}/{REPOSITORIES['adapter' if adapter else 'merged']}'",
         "tokenizer = AutoTokenizer.from_pretrained(repo, token=False)",
