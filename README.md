@@ -87,6 +87,8 @@ noticeably undercalibrated, and close intents still confuse it. There is current
 no evidence that a student matches the teacher or improves cost/quality; that
 decision must wait for the predeclared GPU runs.
 
+[Read the measured pilot failure analysis](docs/STUDENT_PILOT_FINDINGS.md).
+
 ## Architecture
 
 ```mermaid
