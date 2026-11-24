@@ -50,7 +50,7 @@ def health(request: Request) -> dict:
         "status": "ok",
         "system": "tfidf",
         "labels": len(request.app.state.model.labels),
-        "model_release": "Qwen training and Hub release are not executed",
+        "model_release": "This endpoint serves TF-IDF; Qwen artifacts have a separate release lifecycle",
     }
 
 

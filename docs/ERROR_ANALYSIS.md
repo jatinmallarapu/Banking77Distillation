@@ -78,4 +78,4 @@ Measured on the fixed 3,080-query official test set. Source text is PolyAI Banki
 
 Related transfer-status and card-failure intents remain difficult. Lexical overlap is a plausible contributor, but these examples do not establish a causal diagnosis. The baseline is underconfident (ECE 0.2668); its threshold is validation-selected and should not be mistaken for a calibrated probability guarantee.
 
-The next predeclared study is the unrun teacher/student comparison with training-only augmentation, three seeds and matched decoders. Do not claim that distillation resolves these errors until the actual reports exist.
+This initial analysis predates the GPU pilot. Both single-seed students now have complete test reports; see [the pilot findings](STUDENT_PILOT_FINDINGS.md). The three-seed comparison remains future work. Do not infer that augmentation fixes the CPU errors merely because a student was trained.
