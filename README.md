@@ -29,10 +29,10 @@ runner. [Single-GPU execution and recovery](docs/COLAB_PILOT.md).
 | System | Status | Test accuracy, 95% CI | Test macro-F1, 95% CI |
 | --- | --- | --- | --- |
 | TF-IDF + logistic regression | **Measured, CPU** | **88.67% [87.61, 89.81]** | **88.71% [87.62, 89.85]** |
-| Zero-shot Qwen2.5-7B AWQ | Runner implemented; unrun | — | — |
+| Zero-shot Qwen2.5-7B AWQ | Evaluation running; partial batches saved | — | — |
 | Retrieval few-shot Qwen2.5-7B AWQ | Runner implemented; unrun | — | — |
 | Student A · gold only, seed 1 | **Measured, T4 GPU** | **93.21% [92.26, 94.09]** | **93.21% [92.23, 94.08]** |
-| Student B · gold + pilot paraphrases, seed 1 | **Trained; adapter recovered. Test evaluation pending** | — | — |
+| Student B · gold + pilot paraphrases, seed 1 | **Measured, T4 GPU** | **91.98% [90.97, 92.82]** | **91.95% [90.94, 92.79]** |
 
 **Current v0.1 training evidence:** the teacher retained **480/600 paraphrases (80%)**
 from the balanced 200-source subset. Student A trained on 8,992 gold rows; Student B
@@ -42,10 +42,14 @@ accuracy and does not establish that distillation improved routing quality.
 
 Both adapters were recovered from a checksum-verified private backup after Colab
 disconnected. Evaluation resumed on a free Kaggle T4 pair. Student A now has a
-complete 3,080-query GPU report; Student B and the teacher are still evaluating.
+complete 3,080-query GPU report, as does Student B. The teacher evaluation remains in progress.
 Student A batch-1 latency is **548.23 ms p50 / 607.81 ms p95** for scoring all 77 labels;
 this is a GPU inference measurement, not a production API benchmark.
 [Measured Student A report](evals/results/student_a-seed1-batch1.json).
+Student B measured **548.55 ms p50 / 607.44 ms p95** in the same all-label scoring
+mode. Its test accuracy was **1.23 percentage points lower** than Student A despite
+a lower best validation loss. This single-seed, 480-paraphrase pilot does not
+establish a general benefit from distillation. [Measured Student B report](evals/results/student_b-seed1-batch1.json).
 Public release and anonymous inference verification remain pending. [Recovered training evidence](evals/results/training-pilot-v01.json).
 
 **Historical teacher-data pilot (interrupted run):** retained **478/600 paraphrases (79.67%)** from 200 training
@@ -71,7 +75,8 @@ case IDs, masked query text, prediction, confidence and measured latency.
 CPU batch-1 throughput was 109 queries/s; batching 32 queries reached 3,183
 queries/s in the local model loop. These are **CPU measurements**, not GPU
 comparisons. Provider API cost is zero for this baseline, excluding compute and
-infrastructure. Neural GPU cost and latency are unmeasured.
+infrastructure. Student batch-1 GPU scoring latency is measured above. The teacher comparison remains incomplete;
+these measurements do not establish a production speedup over CPU TF-IDF.
 
 ![Measured reliability and coverage trade-off](docs/calibration.png)
 

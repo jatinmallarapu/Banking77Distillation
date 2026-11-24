@@ -9,11 +9,11 @@
     "3": "future_work_not_run_in_v01"
   },
   "student_b_seeds": {
-    "1": "trained_adapter_recovered_and_verified",
+    "1": "trained_and_measured_on_all_3080_official_test_queries",
     "2": "future_work_not_run_in_v01",
     "3": "future_work_not_run_in_v01"
   },
-  "gpu_latency_cost_comparisons": "partial_measured_student_a_batch1_remaining_systems_running",
+  "gpu_latency_cost_comparisons": "partial_measured_both_students_batch1_teacher_running",
   "hugging_face_publication": "pending_complete_gpu_evaluation_and_anonymous_verification",
   "paid_compute": "not_authorized_or_used",
   "gpu_smoke": "passed_two_steps_not_releaseable",
@@ -28,7 +28,7 @@
   },
   "hugging_face_namespace": "JatinMallarapu",
   "hugging_face_authentication": "verified_without_logging_credentials",
-  "status_note": "Student A full-test report recovered from verified private backup 1eaae828c27f78c922baf309d5bf554279aa2e57. Teacher and Student B evaluations continue on free Kaggle T4 GPUs. Publication remains pending.",
+  "status_note": "Both single-seed student reports recovered from checksum-verified private backup 3fd24d079249ec99ff94d6d54c6611de8d1bc76c. Teacher evaluation resumed after correcting exact-case attack target metadata; public publication and anonymous verification remain pending.",
   "study_scope": "v0.1_single_seed_pilot200_full_gold",
   "teacher_source_budget": 200,
   "private_checkpoint_repository": "JatinMallarapu/Banking77TrainingCheckpoints",
