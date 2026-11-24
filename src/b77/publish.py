@@ -221,7 +221,10 @@ def model_card(evidence: dict, adapter: bool) -> str:
         f"LoRA rank/alpha/dropout: {training['lora_rank']}/{training['lora_alpha']}/"
         f"{training['lora_dropout']}; targets: all linear layers; "
         f"maximum length: {training['max_length']}. "
-        "T4 execution uses fp16; the training code selects bf16 only on supporting hardware.",
+        "The pinned training code chooses bf16 or fp16 using PyTorch runtime support; "
+        "the original manifests record the GPU but not the selected dtype. "
+        "Do not infer native bf16 execution from that support check. "
+        "Merged weights are exported on CPU in float32.",
         "",
         "## Measured results",
         "",
