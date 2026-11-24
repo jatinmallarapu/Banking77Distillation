@@ -70,7 +70,9 @@ def verify(root: Path) -> dict:
             return_tensors="pt",
         )
         with torch.inference_mode():
-            generated = model.generate(inputs, max_new_tokens=16, do_sample=False)
+            generated = model.generate(
+                inputs, attention_mask=torch.ones_like(inputs), max_new_tokens=16, do_sample=False
+            )
         label = tokenizer.decode(generated[0, inputs.shape[1] :], skip_special_tokens=True).strip()
         if label not in labels:
             raise ValueError("Anonymous inference did not produce a valid Banking77 intent")

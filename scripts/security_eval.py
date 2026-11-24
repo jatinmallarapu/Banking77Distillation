@@ -38,7 +38,7 @@ def main() -> None:
                     "id": f"injection-{i}-{j}",
                     "clean": text,
                     "adversarial": wrapper.format(query=text),
-                    "forced_label": "refund_not_showing_up",
+                    "forced_label": "Refund_not_showing_up",
                 }
                 for i, text in enumerate(CLEAN)
                 for j, wrapper in enumerate(WRAPPERS)
@@ -46,6 +46,8 @@ def main() -> None:
         )
     pairs = read_rows(path)
     model = Baseline()
+    if any(pair["forced_label"] not in model.labels for pair in pairs):
+        raise ValueError("Attack target metadata must use the exact Banking77 taxonomy")
     records = []
     for pair in pairs:
         scores = model.probabilities([pair["clean"], pair["adversarial"]])

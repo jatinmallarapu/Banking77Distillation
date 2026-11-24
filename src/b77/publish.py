@@ -311,7 +311,7 @@ def model_card(evidence: dict, adapter: bool) -> str:
         "{'role': 'user', 'content': \"My new card still hasn't arrived\"}]",
         "inputs = tokenizer.apply_chat_template(messages, add_generation_prompt=True, "
         "return_tensors='pt')",
-        "output = model.generate(inputs, max_new_tokens=16, do_sample=False)",
+        "output = model.generate(inputs, attention_mask=torch.ones_like(inputs), max_new_tokens=16, do_sample=False)",
         "print(tokenizer.decode(output[0, inputs.shape[1]:], skip_special_tokens=True))",
         "```",
         "",

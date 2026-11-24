@@ -124,3 +124,15 @@ def test_paired_audit_excludes_preexisting_target_predictions():
     assert report["eligible_cases"] == 1
     assert report["eligible_targeted_change_fraction"] == 1
     assert report["attacked_abstention_fraction"] == 1
+
+
+def test_authored_attack_targets_preserve_official_label_case():
+    from pathlib import Path
+
+    from b77.data import read_rows
+
+    pairs = read_rows(Path("evals/injection_set.jsonl"))
+    assert len(pairs) == 50
+    assert {row["forced_label"] for row in pairs} == {"Refund_not_showing_up"}
+    # Lowercase attack text is intentional; metadata must identify the canonical target.
+    assert "refund_not_showing_up" in pairs[0]["adversarial"]
