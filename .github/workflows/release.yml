@@ -1,0 +1,29 @@
+name: Verified model release
+on:
+  push:
+    branches: [main]
+    paths: [release/public_verification.json]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: banking77-v01-release
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'jatinmallarapu/Banking77Distillation' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python scripts/publish_github_release.py
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
