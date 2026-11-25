@@ -42,6 +42,12 @@ not matched GPU speedups. Resumed evaluations preserve measured batches and
 session IDs. The GPU price assumption is **$0/hour on free compute**; zero recorded
 cost is not a production hosting quote.
 
+[Compressed per-query predictions and checksums](evals/results/prediction-files.json)
+include all 3,080 case IDs, masked text, labels, confidence and measured latency
+for each system. Download and decompress the adjacent `.jsonl.gz` files to audit
+the reports; the recorded accuracy, macro-F1 and latency percentiles were checked
+against these rows.
+
 ![Measured quality and latency](docs/figures/quality_latency.svg)
 
 ![Measured calibration](docs/figures/reliability.svg)
