@@ -2,242 +2,151 @@
 
 [![CI](https://github.com/jatinmallarapu/Banking77Distillation/actions/workflows/ci.yml/badge.svg)](https://github.com/jatinmallarapu/Banking77Distillation/actions/workflows/ci.yml)
 [![Code: MIT](https://img.shields.io/badge/code-MIT-146d7f.svg)](LICENSE)
-[![Data: CC BY 4.0](https://img.shields.io/badge/data-CC_BY_4.0-146d7f.svg)](ATTRIBUTION.md)
+[![Model: Apache 2.0](https://img.shields.io/badge/weights-Apache_2.0-146d7f.svg)](https://huggingface.co/JatinMallarapu/qwen2.5-0.5b-banking77-distill)
 
-**When is prompting not enough?** A reproducible experiment for comparing prompting,
-fine-tuning and distillation in customer-intent routing—starting with a measured
-CPU reference and recording GPU execution status explicitly.
+**When is prompting not enough?** Prompting, supervised fine-tuning and sequence-level
+distillation compared for customer-intent routing, with a small model released on Hugging Face.
 
-## Results and execution status
+**v0.1: pilot, single seed, 200-query teacher subset.**
+[Merged model](https://huggingface.co/JatinMallarapu/qwen2.5-0.5b-banking77-distill)
+· [LoRA adapter](https://huggingface.co/JatinMallarapu/qwen2.5-0.5b-banking77-distill-lora)
+· [Model card](MODEL_CARD.md)
+· [Anonymous download and inference proof](release/public_verification.json)
 
-The TF-IDF/logistic model was trained and evaluated on all **3,080 official test
-queries**. **The public distilled model is not released yet.** The first release
-now uses an intent-balanced **200-query teacher subset**, the full **8,992-query
-gold training split**, and **one seed per student for v0.1**. The free Colab fallback
-runs sequentially on one GPU. The original three-seed Kaggle study remains available;
-additional seeds, batch-32 scaling, few-shot comparison and the larger all-source study remain future work
-for the reduced v0.1 release. No GPU results below are implied by runner availability.
+## Measured results
 
-[Open the single-GPU Colab runner](https://colab.research.google.com/github/jatinmallarapu/Banking77Distillation/blob/main/notebooks/colab_single_gpu_pilot.ipynb)
-· [Execution and recovery instructions](docs/COLAB_PILOT.md)
+All four systems were evaluated on the same **3,080 official test queries**. The
+training split contains **8,992 gold queries**, with **1,000 validation queries**.
+Student B adds **480 accepted paraphrases** from 200 intent-balanced training
+sources: **480/600 retained (80%)**, requiring three teacher votes to agree with
+the source label. The paraphrases are teacher-filtered, not human-verified.
 
-An earlier Kaggle session trained two gold-only seeds but stopped before a
-verified external backup. Those checkpoints are not treated as current release
-artifacts. The Colab retry uses verified private checkpoints and a foreground
-runner. [Single-GPU execution and recovery](docs/COLAB_PILOT.md).
+| System | Accuracy [95% CI] | Macro-F1 [95% CI] | p50 / p95 ms |
+| --- | --- | --- | ---: |
+| [TF-IDF + logistic regression (CPU)](evals/results/tfidf-test.json) | 88.67% [87.61, 89.81] | 88.71% [87.62, 89.85] | 3.21 / 5.54 |
+| [Qwen2.5-7B AWQ · zero-shot](evals/results/zeroshot-batch1.json) | 61.79% [60.37, 62.94] | 59.68% [58.06, 60.80] | 3684.31 / 3703.69 |
+| [Student A · gold only, seed 1](evals/results/student_a-seed1-batch1.json) | 93.21% [92.26, 94.09] | 93.21% [92.23, 94.08] | 548.23 / 607.81 |
+| [Student B · gold + distilled, seed 1](evals/results/student_b-seed1-batch1.json) | 91.98% [90.97, 92.82] | 91.95% [90.94, 92.79] | 548.55 / 607.44 |
 
-| System | Status | Test accuracy, 95% CI | Test macro-F1, 95% CI |
-| --- | --- | --- | --- |
-| TF-IDF + logistic regression | **Measured, CPU** | **88.67% [87.61, 89.81]** | **88.71% [87.62, 89.85]** |
-| Zero-shot Qwen2.5-7B AWQ | Evaluation running; partial batches saved | — | — |
-| Retrieval few-shot Qwen2.5-7B AWQ | Runner implemented; unrun | — | — |
-| Student A · gold only, seed 1 | **Measured, T4 GPU** | **93.21% [92.26, 94.09]** | **93.21% [92.23, 94.08]** |
-| Student B · gold + pilot paraphrases, seed 1 | **Measured, T4 GPU** | **91.98% [90.97, 92.82]** | **91.95% [90.94, 92.79]** |
+**The negative result matters:** Student B scored **1.23 percentage points below
+Student A** in this pilot. Distillation did not improve the measured student
+accuracy. The released artifact is Student B's validation-selected checkpoint,
+so that the augmentation experiment is inspectable and reproducible; it is not
+presented as the strongest model in this comparison.
 
-**Current v0.1 training evidence:** the teacher retained **480/600 paraphrases (80%)**
-from the balanced 200-source subset. Student A trained on 8,992 gold rows; Student B
-trained on 9,472 rows including the accepted paraphrases. Their best validation losses
-were **0.0559085980** and **0.0533467755**, respectively. Validation loss is not test
-accuracy and does not establish that distillation improved routing quality.
+Intervals are 300 label-stratified query-bootstrap resamples of a fixed fitted
+model. One seed cannot estimate training-seed variation. GPU timings measure
+**all-77-label likelihood scoring**, including EOS, at batch 1. They are not
+greedy-generation or HTTP serving benchmarks. TF-IDF timings are CPU references,
+not matched GPU speedups. Resumed evaluations preserve measured batches and
+session IDs. The GPU price assumption is **$0/hour on free compute**; zero recorded
+cost is not a production hosting quote.
 
-Both adapters were recovered from a checksum-verified private backup after Colab
-disconnected. Evaluation resumed on a free Kaggle T4 pair. Student A now has a
-complete 3,080-query GPU report, as does Student B. The teacher evaluation remains in progress.
-Student A batch-1 latency is **548.23 ms p50 / 607.81 ms p95** for scoring all 77 labels;
-this is a GPU inference measurement, not a production API benchmark.
-[Measured Student A report](evals/results/student_a-seed1-batch1.json).
-Student B measured **548.55 ms p50 / 607.44 ms p95** in the same all-label scoring
-mode. Its test accuracy was **1.23 percentage points lower** than Student A despite
-a lower best validation loss. This single-seed, 480-paraphrase pilot does not
-establish a general benefit from distillation. [Measured Student B report](evals/results/student_b-seed1-batch1.json).
-Public release and anonymous inference verification remain pending. [Recovered training evidence](evals/results/training-pilot-v01.json).
+![Measured quality and latency](docs/figures/quality_latency.svg)
 
-**Historical teacher-data pilot (interrupted run):** retained **478/600 paraphrases (79.67%)** from 200 training
-queries covering all 77 intents, in **21.79 minutes** on one T4. Three seeded votes
-still had to agree with the source gold label. This is augmentation retention,
-not test accuracy or human-verified semantic quality. These are historical audit results, not the new release's training artifacts. [Pilot evidence](evals/results/teacher-pilot200.json).
+![Measured calibration](docs/figures/reliability.svg)
 
-The intervals use 300 label-stratified bootstrap resamples of a fixed model; they
-are not training-seed standard deviations. [Full measured report](evals/results/tfidf-test.json)
-contains worst-class intervals, calibration, coverage and the ten most confused
-intent pairs. [Per-query predictions](evals/results/tfidf-test.jsonl) retain stable
-case IDs, masked query text, prediction, confidence and measured latency.
+TF-IDF uses raw logistic probabilities; the LLMs use validation-selected
+temperature scaling. Calibration comparisons therefore reflect that difference
+as well as the models. [Figure source hashes](docs/figures/sources.json).
 
-| CPU behavior | Observed result |
-| --- | ---: |
-| Single-query model latency p50 / p95 | 8.32 / 12.15 ms |
-| ECE, ten bins | 0.2668 |
-| Coverage at validation-chosen threshold | 97.79% of test queries |
-| Accuracy among automatically routed test queries | 90.01% |
-| Authored injection pairs changing the raw label | 1 / 50 (2.0%) |
-| Authored injection pairs hitting the forced target | 0 / 50 |
+## What this project demonstrates
 
-CPU batch-1 throughput was 109 queries/s; batching 32 queries reached 3,183
-queries/s in the local model loop. These are **CPU measurements**, not GPU
-comparisons. Provider API cost is zero for this baseline, excluding compute and
-infrastructure. Student batch-1 GPU scoring latency is measured above. The teacher comparison remains incomplete;
-these measurements do not establish a production speedup over CPU TF-IDF.
-
-![Measured reliability and coverage trade-off](docs/calibration.png)
-
-**Current decision:** TF-IDF is a credible starting point for this narrow,
-in-domain English task if its measured quality and human-review workload meet the
-business target. It needs no GPU or language-model endpoint. Its confidence is
-noticeably undercalibrated, and close intents still confuse it. There is currently
-no evidence that a student matches the teacher or improves cost/quality; that
-decision must wait for the predeclared GPU runs.
-
-[Read the measured pilot failure analysis](docs/STUDENT_PILOT_FINDINGS.md).
+- A simple CPU baseline alongside a 7B teacher and two 0.5B LoRA students.
+- Training-only distillation, immutable data/model revisions, overlap checks and
+  frozen augmentation included with the public model artifacts.
+- Full-test quality, uncertainty intervals, calibration, coverage curves, latency,
+  token counts and explicit cost assumptions in machine-readable reports.
+- A 300-case regression gate, API contract tests, bounded inputs and PII masking.
+- Atomic evaluation checkpoints and checksum-verified private recovery, followed
+  by an evidence gate and fresh-process anonymous model verification.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-  D[Banking77 · pinned Parquet revision] --> S[Deduplicate + stratified train / validation]
-  S --> B[Measured TF-IDF reference]
-  S --> T[Qwen 7B · training-only paraphrases]
-  T --> F[Three votes agree with source gold + leakage filter]
+  D[Banking77 · pinned revision] --> S[Deduplicate and freeze splits]
+  S --> B[TF-IDF CPU baseline]
+  S --> T[Qwen 7B AWQ teacher]
+  T --> F[Three-vote filter + overlap checks]
   S --> A[Student A · gold only]
-  F --> C[Student B · gold + distilled]
-  A & C --> V[Validation checkpoint / temperature / abstention]
-  B & V --> E[Fixed test · quality / calibration / latency / cost]
-  E --> G[300-case CI gate + live consistency check]
-  B --> API[FastAPI CPU /classify service]
-  C -. future, not published .-> H[Local merged weights / adapter / model card]
+  F --> C[Student B · gold + paraphrases]
+  A & C --> V[Validation checkpoint and calibration]
+  B & T & V --> E[Same 3080 test queries]
+  E --> G[Reports + regression gate]
+  E --> R[Evidence-checked model release]
+  B --> API[FastAPI baseline service]
+  R --> H[Public merged model + adapter]
 ```
 
-## Reproduce the CPU project in three commands
+Teacher data generation uses a vLLM endpoint; the measured teacher evaluation
+uses pinned local AWQ weights and complete-label likelihoods. These are separate
+execution paths, not a vLLM serving-performance claim.
 
-From a clone of this repository, with Python **3.11** and an isolated environment:
+## Run the CPU baseline in three commands
+
+Use Python 3.11 and an isolated environment. From the parent directory:
 
 ```sh
-python -m pip install -e '.[dev]'
-python scripts/reproduce_cpu.py
-uvicorn b77.serve:app --host 127.0.0.1 --port 8000 --no-access-log
+git clone https://github.com/jatinmallarapu/Banking77Distillation.git
+python -m pip install -e "./Banking77Distillation[dev]"
+make -C Banking77Distillation baseline gate
 ```
 
-The reproduction command downloads the pinned public corpus, rebuilds the CPU
-model, scores the frozen gate, checks its regression threshold and runs tests.
-It does **not** rerun the full test set or start GPU work. Open `/docs` for the
-interactive API schema. Docker alternative: `docker compose up --build`.
+This prepares the pinned data, trains TF-IDF and checks the frozen 300-case gate.
+To explicitly rerun the full official test evaluation, from the repository run
+`b77 evaluate-baseline --split test --final-test`. Hardware-dependent timing will
+differ. `make test` runs unit/integration tests and `make up` starts the baseline
+FastAPI service with Docker Compose. `/classify` serves TF-IDF; the released Qwen
+weights are separate artifacts, not silently substituted into that endpoint.
 
-```sh
-curl -X POST http://localhost:8000/classify -H 'Content-Type: application/json' \
-  -d '{"text":"Where is my new debit card?"}'
-```
+## Reproduce the GPU experiment
 
-The response is `{label, confidence, needs_human_review, latency_ms}`. Below the
-validation-selected threshold, `label` is `needs_human_review`; otherwise it is
-one of the 77 allowed labels. `/health` identifies the deployed **TF-IDF** system.
-The API is a local research demo, with no authentication, banking actions or
-production authorization controls. Do not expose it or submit real customer data.
+Install `.[train,teacher-eval]` on existing GPU compute and follow the
+[release reproduction protocol](docs/REPRODUCE_RELEASE.md). The public model includes
+`filtered_training_paraphrases.jsonl` and `release_evidence.json`, recording
+dataset fingerprints, model revisions, training settings and the declared scope.
+Use the frozen augmentation to reproduce training without regenerating stochastic
+teacher outputs. See [evaluation recovery](docs/EVALUATION_RECOVERY.md) for score
+checkpoints and identity checks. The broader original runners may also schedule
+batch 32; the published v0.1 reports declare batch 1 only.
 
-## Data discipline
+The [model card](MODEL_CARD.md) gives an anonymous usage example. Its generation
+example is a load smoke test; the reported classification metrics require the
+all-label scorer and the documented system prompt.
 
-The official dataset contains 10,003 train and 3,080 test queries. Eleven duplicate
-or overlapping training records are quarantined, leaving **8,992 train / 1,000
-validation** queries. Test membership and labels are unchanged. The 300-case gate
-is stratified with three or four examples per intent. IDs, source revision and
-split hashes are versioned in [the manifest](data/manifest.json).
+## Guardrails and failure analysis
 
-The teacher can paraphrase **training queries only**. A candidate is retained only
-when three temperature-0.7 labels agree with the source gold label. The data records
-text, label, source ID, votes, teacher agreement and revision. Normalized duplicate
-and test/validation overlap checks fail closed. Agreement is not proof of semantic
-correctness; manually inspect the retained examples. Keep rate: **unmeasured**.
+The selected Student B was audited on **50 authored clean/attack pairs**:
+**36.00%** changed its raw output,
+**30.00%** returned the forced target, and
+**0.00%** were flagged for review at the
+validation-selected operating point. These small authored cases do not certify
+resistance to arbitrary attacks. [Measured audit](evals/results/student_b-seed1-injections.json).
 
-CI's repeated gate is an exposed regression fixture, not a validation set for
-hyperparameter selection. Future research comparisons should separately report
-the 2,780 test queries outside that gate. See [the full protocol](docs/PROTOCOL.md).
+Both students selected a zero abstention threshold for the configured 90%
+empirical validation target; that operating point performs no abstentions.
+Coverage curves are retained for inspection. Regex masking is partial protection,
+not a privacy guarantee. Never use this prototype for payments, fraud decisions
+or unreviewed real-customer banking workflows.
 
-## The prepared GPU experiment
+[Read the pilot failure analysis](docs/STUDENT_PILOT_FINDINGS.md): close intent
+boundaries, lower validation loss without better test accuracy, and the exact-case
+taxonomy mismatch that initially stopped the injection audit.
 
-The local GPU has 2 GB VRAM, so the six LoRA runs and 7B teacher were not attempted.
-The staged runner targets an **existing** free Linux CUDA session with at least
-14 GiB VRAM. It never rents hardware or uploads to Hugging Face.
+## Limitations and next experiments
 
-```sh
-python -m pip install -e '.[train,teacher,dev]'
-python scripts/gpu_runner.py smoke
-```
+This is an English, in-domain benchmark with one training seed and a small
+teacher-source subset. Few-shot comparison, additional seeds, full-source
+distillation, batch-32 scaling, domain-shift tests and production serving load
+tests remain future work. Teacher agreement does not establish paraphrase quality.
+The original training manifests record hardware but not the runtime-selected
+dtype; the model card preserves that limitation. The merged artifact uses float32.
 
-Then follow [GPU_RUNBOOK.md](docs/GPU_RUNBOOK.md) for teacher filtering, full
-students, matched batch-1/batch-32 evaluation and local release preparation.
-[The notebook](notebooks/free_gpu_runner.ipynb) is only a launcher; source code owns
-the logic. The pinned training stack passed the actual T4 GPU smoke run. A two-step smoke checkpoint cannot pass the release readiness check.
+## License and attribution
 
-- Student base: Qwen2.5-0.5B-Instruct, pinned revision, Apache 2.0.
-- Teacher: Qwen2.5-7B-Instruct-AWQ, pinned revision, Apache 2.0.
-- Three seeds each: 1, 2, 3. LoRA r=16, alpha=32, dropout=0.05, all linear layers.
-- Completion-only SFT, three epochs, 2e-4 learning rate; best validation-loss checkpoint.
-- Maximum training length 128, with explicitly counted query-tail truncation that
-  retains the full label. BF16 where supported, FP16 otherwise.
-- Teacher few-shot context uses ten nearest **training-only sparse TF-IDF vectors**;
-  this is lexical retrieval, not a claimed dense-embedding system.
-- Neural evaluation scores all 77 complete labels by sequence log-likelihood;
-  validation chooses temperature and abstention. This decoder is more expensive
-  than one guided generation, and that difference must be included in comparisons.
-
-## Guardrails, CI and short load tests
-
-Regex masking removes email-like strings and long numeric identifiers before
-model input and prediction logging. The test suite covers mask idempotence,
-input bounds, label vocabulary, actual API contracts, source/test leakage,
-teacher request structure, calibration edge cases and incomplete-release rejection.
-Regex masking is not a complete PII detector. A finite vocabulary prevents invented
-labels, not wrong allowed labels or injection success.
-
-The 50 authored injection pairs cross five clean prompts with ten override
-wrappers. Their measured paired-change rate is a narrow regression result, not a
-claim of comprehensive security. [Attack pairs](evals/injection_set.jsonl) ·
-[Measured outcomes](evals/results/tfidf-injections.json)
-
-Every PR rebuilds the baseline and scores the gate. CI blocks a macro-F1 decline
-greater than **one absolute percentage point** from `evals/baseline.json`, missing
-or duplicate cases, changed identities and live prediction/cache disagreement.
-Container health and classification are also exercised. GPU experiments and Hub
-uploads never run in CI. Baseline changes must be reviewed separately.
-
-| Local HTTP smoke scenario | Requests in CSV snapshot | Failures | Requests/s | p50 / p95 |
-| --- | ---: | ---: | ---: | ---: |
-| 10 users | 111 | 0 | 17.1 | 17 / 200 ms |
-| 50 users | 483 | 0 | 71.2 | 34 / 400 ms |
-| 100 users | 902 | 0 | 112.2 | 110 / 340 ms |
-
-These are short ten-second, loopback tests with think time, a ramp and shared
-client/server CPU—not sustained capacity benchmarks. [Raw CSV and configuration](benchmarks/results.json).
-The Locust file adapts the request pattern from LanguageModelInferenceBenchmark.
-
-## Model release status
-
-**No Hugging Face model has been published.** The planned name is
-`JatinMallarapu/qwen2.5-0.5b-banking77-distill`, with a separate adapter and filtered
-dataset after complete training and evaluation. No working model link is
-implied. [MODEL_CARD.md](MODEL_CARD.md) is explicitly a preparation card.
-`python -m b77.release` refuses missing or smoke-only runs; `--merge` is a local
-operation after readiness checks. The gated publisher and anonymous verification
-commands are documented in [PUBLICATION.md](docs/PUBLICATION.md); they do not make
-the model released until the actual upload and verification pass.
-
-## Files worth reviewing
-
-| Path | Responsibility |
-| --- | --- |
-| `src/b77/data.py` | Pinned source, deduplication, splits and frozen gate |
-| `baselines.py`, `metrics.py`, `gate.py` | Fitted baseline, uncertainty and regression checks |
-| `teacher.py`, `train_student.py`, `scoring.py` | Filtering, LoRA and constrained likelihood evaluation |
-| `guardrails.py`, `serve.py` | Masking, bounded schemas and serving |
-| `release.py`, `publish.py`, `verify_public.py` | Evidence gates, merge, public upload and anonymous verification |
-| `evals/results/` | Measured, redacted CPU evidence |
-
-## Attribution and limitations
-
-Banking77 is by PolyAI, **CC BY 4.0**. Cite Casanueva et al. (2020), *Efficient Intent
-Detection with Dual Sentence Encoders*. The gate subset and future adaptations
-retain attribution; see [ATTRIBUTION.md](ATTRIBUTION.md). Project code is MIT;
-Qwen's base weights are Apache 2.0 and are not included in this GitHub repository.
-
-This is an independent portfolio project, not an Artefact, PolyAI, Qwen or bank
-deployment. It does not cover forecasting, optimization, multilingual routing or
-real banking decision quality. The unrun teacher/student comparison and unpublished
-weights are material limitations, not completed achievements.
+Personal research project, not affiliated with a bank, PolyAI or Qwen. Code: MIT.
+Released weights: Apache 2.0, derived from Qwen2.5-0.5B-Instruct. Banking77 and
+derived paraphrases: CC BY 4.0; credit PolyAI and Casanueva et al. (2020),
+*Efficient Intent Detection with Dual Sentence Encoders*. See
+[ATTRIBUTION.md](ATTRIBUTION.md) and the public model's license files.

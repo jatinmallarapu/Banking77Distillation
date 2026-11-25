@@ -80,7 +80,7 @@
         "upper": 0.2,
         "count": 1,
         "confidence": 0.15568769869019053,
-        "accuracy": 0
+        "accuracy": 0.0
       },
       {
         "lower": 0.2,
@@ -133,7 +133,7 @@
       },
       {
         "lower": 0.9,
-        "upper": 1,
+        "upper": 1.0,
         "count": 2536,
         "confidence": 0.9829595861457365,
         "accuracy": 0.9889589905362776
@@ -141,28 +141,28 @@
     ]
   },
   "abstention": {
-    "threshold": 0,
-    "coverage": 1,
+    "threshold": 0.0,
+    "coverage": 1.0,
     "accepted_accuracy": 0.9321428571428572,
     "curve": [
       {
-        "threshold": 0,
-        "coverage": 1,
+        "threshold": 0.0,
+        "coverage": 1.0,
         "accuracy": 0.9321428571428572
       },
       {
         "threshold": 0.05,
-        "coverage": 1,
+        "coverage": 1.0,
         "accuracy": 0.9321428571428572
       },
       {
         "threshold": 0.1,
-        "coverage": 1,
+        "coverage": 1.0,
         "accuracy": 0.9321428571428572
       },
       {
         "threshold": 0.15000000000000002,
-        "coverage": 1,
+        "coverage": 1.0,
         "accuracy": 0.9321428571428572
       },
       {
@@ -246,8 +246,8 @@
         "accuracy": 0.9917139119058003
       },
       {
-        "threshold": 1,
-        "coverage": 0,
+        "threshold": 1.0,
+        "coverage": 0.0,
         "accuracy": null
       }
     ]
@@ -361,7 +361,7 @@
   "status": "measured",
   "evaluation_recovery": {
     "validation_rows_reused": 1000,
-    "test_rows_reused": 176,
+    "test_rows_reused": 3080,
     "measurement_sessions": [
       "6c3e335b3052444f95aec8ed858d77a7",
       "85e4de56113140ce80bd3abfe2e9e05c"
@@ -374,9 +374,9 @@
   "case_sha256": "dff3dfd9f9690c1b07f18488247237e387a81cb54fc68f566d04ce319886ab92",
   "temperature": 1.5,
   "abstention_selection": {
-    "threshold": 0,
+    "threshold": 0.0,
     "target_accuracy": 0.9,
-    "validation_coverage": 1,
+    "validation_coverage": 1.0,
     "validation_selective_accuracy": 0.921,
     "selection": "Maximize validation coverage with >=30 accepted and target empirical accuracy; not a guarantee."
   },
@@ -393,7 +393,7 @@
     "output_tokens": 1188880
   },
   "elapsed_inference_seconds": 1708.2936529880058,
-  "gpu_hourly_price_assumption": 0,
-  "cost_per_1000": 0,
+  "gpu_hourly_price_assumption": 0.0,
+  "cost_per_1000": 0.0,
   "decoder": "normalized log-likelihood of all 77 complete label sequences including EOS; not one greedy generation"
 }

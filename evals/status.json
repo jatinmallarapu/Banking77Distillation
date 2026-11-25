@@ -1,6 +1,6 @@
 {
   "tfidf_baseline": "measured_on_official_test",
-  "teacher_zero_shot": "running_on_free_kaggle_t4_pair_with_verified_score_checkpoints",
+  "teacher_zero_shot": "measured_on_all_3080_official_test_queries",
   "teacher_few_shot": "not_run",
   "teacher_distillation_keep_rate": 0.8,
   "student_a_seeds": {
@@ -13,8 +13,8 @@
     "2": "future_work_not_run_in_v01",
     "3": "future_work_not_run_in_v01"
   },
-  "gpu_latency_cost_comparisons": "partial_measured_both_students_batch1_teacher_running",
-  "hugging_face_publication": "pending_complete_gpu_evaluation_and_anonymous_verification",
+  "gpu_latency_cost_comparisons": "measured_batch1_all_four_systems_with_explicit_hardware_scopes",
+  "hugging_face_publication": "verified_public_download_and_inference_both_artifacts",
   "paid_compute": "not_authorized_or_used",
   "gpu_smoke": "passed_two_steps_not_releaseable",
   "teacher_distillation": "completed_colab_pilot200_verified_backup",
@@ -28,7 +28,7 @@
   },
   "hugging_face_namespace": "JatinMallarapu",
   "hugging_face_authentication": "verified_without_logging_credentials",
-  "status_note": "Both single-seed student reports recovered from checksum-verified private backup 3fd24d079249ec99ff94d6d54c6611de8d1bc76c. Teacher evaluation resumed after correcting exact-case attack target metadata; public publication and anonymous verification remain pending.",
+  "status_note": "v0.1 pilot released after complete evidence and anonymous verification; larger study remains future work.",
   "study_scope": "v0.1_single_seed_pilot200_full_gold",
   "teacher_source_budget": 200,
   "private_checkpoint_repository": "JatinMallarapu/Banking77TrainingCheckpoints",
@@ -36,7 +36,7 @@
   "previous_attempt": "interrupted; trained adapters not present in replacement session; queued Kaggle save not verified",
   "full_all_source_study": "future_work_not_completed",
   "private_checkpoint_backup": "downloaded_and_sha256_verified",
-  "latest_verified_backup_commit": "895b0203a0cc6921fd0cfdcab8c3b2e871743927",
+  "latest_verified_backup_commit": "1af2a029c4ede03ce6443378f35a52dc8429e80d",
   "current_teacher_pilot": {
     "sources": 200,
     "proposed": 600,
@@ -47,5 +47,10 @@
   "evaluation_batch_sizes": [
     1
   ],
-  "batch32_scaling": "future_work_for_v01"
+  "batch32_scaling": "future_work_for_v01",
+  "public_verification_receipt": "release/public_verification.json",
+  "hugging_face_revisions": {
+    "JatinMallarapu/qwen2.5-0.5b-banking77-distill": "caf113ec3522be672994d188ba3be791a0b32491",
+    "JatinMallarapu/qwen2.5-0.5b-banking77-distill-lora": "d825741218139d7ac28130609e7968157bf904d9"
+  }
 }

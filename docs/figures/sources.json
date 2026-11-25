@@ -1,0 +1,6 @@
+{
+  "tfidf-test.json": "96f97ea248fc48171c7edf94cc802dbf87d8bf9a5288fbcdeb1d9dd82c25252d",
+  "zeroshot-batch1.json": "fd420cf4a972c3a9181c16eb7ad33c17bfec2f5ec0f26076626b889d63fdde66",
+  "student_a-seed1-batch1.json": "d52326ceff4c7d4cd07153eb5a4f3ab4ac17a062b8d170677e2be036fd94e9b7",
+  "student_b-seed1-batch1.json": "6ea4a94bb7dc8803b862f3de307b5d11bc856a969dc7c8adf7519519ebf6fec7"
+}

@@ -1,0 +1,18 @@
+{
+  "status": "verified_public_download_and_inference",
+  "models": {
+    "JatinMallarapu/qwen2.5-0.5b-banking77-distill": {
+      "revision": "caf113ec3522be672994d188ba3be791a0b32491",
+      "anonymous_download": true,
+      "force_download": true,
+      "smoke_label": "card_arrival"
+    },
+    "JatinMallarapu/qwen2.5-0.5b-banking77-distill-lora": {
+      "revision": "d825741218139d7ac28130609e7968157bf904d9",
+      "anonymous_download": true,
+      "force_download": true,
+      "smoke_label": "card_arrival"
+    }
+  },
+  "scope": "one generation smoke per artifact; full quality is in evaluation reports"
+}

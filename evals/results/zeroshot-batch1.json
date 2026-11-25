@@ -1,0 +1,406 @@
+{
+  "cases": 3080,
+  "accuracy": 0.6178571428571429,
+  "macro_f1": 0.5967872341806494,
+  "accuracy_ci95": [
+    0.6037094155844156,
+    0.6293912337662337
+  ],
+  "macro_f1_ci95": [
+    0.5806122391012398,
+    0.6080305128059985
+  ],
+  "bootstrap": {
+    "replicates": 300,
+    "seed": 2026,
+    "method": "stratified percentile, fixed fitted model"
+  },
+  "worst_classes": [
+    {
+      "label": "card_arrival",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 40,
+      "f1_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "label": "get_physical_card",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 40,
+      "f1_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "label": "topping_up_by_card",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 40,
+      "f1_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "label": "transfer_timing",
+      "precision": 0.16666666666666666,
+      "recall": 0.025,
+      "f1": 0.043478260869565216,
+      "support": 40,
+      "f1_ci95": [
+        0.0,
+        0.14401801029159486
+      ]
+    },
+    {
+      "label": "order_physical_card",
+      "precision": 0.5,
+      "recall": 0.025,
+      "f1": 0.047619047619047616,
+      "support": 40,
+      "f1_ci95": [
+        0.0,
+        0.13953488372093023
+      ]
+    }
+  ],
+  "calibration": {
+    "ece": 0.050926146914245886,
+    "bins": [
+      {
+        "lower": 0.0,
+        "upper": 0.1,
+        "count": 11,
+        "confidence": 0.08876541146396334,
+        "accuracy": 0.18181818181818182
+      },
+      {
+        "lower": 0.1,
+        "upper": 0.2,
+        "count": 90,
+        "confidence": 0.15762289884604866,
+        "accuracy": 0.1111111111111111
+      },
+      {
+        "lower": 0.2,
+        "upper": 0.30000000000000004,
+        "count": 168,
+        "confidence": 0.25110307352518035,
+        "accuracy": 0.21428571428571427
+      },
+      {
+        "lower": 0.30000000000000004,
+        "upper": 0.4,
+        "count": 260,
+        "confidence": 0.3590847587509898,
+        "accuracy": 0.2846153846153846
+      },
+      {
+        "lower": 0.4,
+        "upper": 0.5,
+        "count": 289,
+        "confidence": 0.4499831235382769,
+        "accuracy": 0.39792387543252594
+      },
+      {
+        "lower": 0.5,
+        "upper": 0.6000000000000001,
+        "count": 303,
+        "confidence": 0.5501397907393129,
+        "accuracy": 0.4752475247524752
+      },
+      {
+        "lower": 0.6000000000000001,
+        "upper": 0.7000000000000001,
+        "count": 346,
+        "confidence": 0.6510223722587296,
+        "accuracy": 0.5404624277456648
+      },
+      {
+        "lower": 0.7000000000000001,
+        "upper": 0.8,
+        "count": 421,
+        "confidence": 0.7533102073548829,
+        "accuracy": 0.6959619952494062
+      },
+      {
+        "lower": 0.8,
+        "upper": 0.9,
+        "count": 620,
+        "confidence": 0.8522989494515564,
+        "accuracy": 0.8193548387096774
+      },
+      {
+        "lower": 0.9,
+        "upper": 1.0,
+        "count": 572,
+        "confidence": 0.9432436563704265,
+        "accuracy": 0.9335664335664335
+      }
+    ]
+  },
+  "abstention": {
+    "threshold": 0.8297390773496351,
+    "coverage": 0.3301948051948052,
+    "accepted_accuracy": 0.8859390363815143,
+    "curve": [
+      {
+        "threshold": 0.0,
+        "coverage": 1.0,
+        "accuracy": 0.6178571428571429
+      },
+      {
+        "threshold": 0.05,
+        "coverage": 1.0,
+        "accuracy": 0.6178571428571429
+      },
+      {
+        "threshold": 0.1,
+        "coverage": 0.9964285714285714,
+        "accuracy": 0.6194200065167808
+      },
+      {
+        "threshold": 0.15000000000000002,
+        "coverage": 0.9840909090909091,
+        "accuracy": 0.625866050808314
+      },
+      {
+        "threshold": 0.2,
+        "coverage": 0.9672077922077922,
+        "accuracy": 0.6347767707284323
+      },
+      {
+        "threshold": 0.25,
+        "coverage": 0.9409090909090909,
+        "accuracy": 0.6459627329192547
+      },
+      {
+        "threshold": 0.30000000000000004,
+        "coverage": 0.9126623376623376,
+        "accuracy": 0.6599075062255425
+      },
+      {
+        "threshold": 0.35000000000000003,
+        "coverage": 0.8824675324675325,
+        "accuracy": 0.6758646063281825
+      },
+      {
+        "threshold": 0.4,
+        "coverage": 0.8282467532467532,
+        "accuracy": 0.6981575852606821
+      },
+      {
+        "threshold": 0.45,
+        "coverage": 0.7821428571428571,
+        "accuracy": 0.7152345371523454
+      },
+      {
+        "threshold": 0.5,
+        "coverage": 0.7344155844155844,
+        "accuracy": 0.7365163572060124
+      },
+      {
+        "threshold": 0.55,
+        "coverage": 0.6866883116883117,
+        "accuracy": 0.7598108747044917
+      },
+      {
+        "threshold": 0.6000000000000001,
+        "coverage": 0.6360389610389611,
+        "accuracy": 0.7769270035732516
+      },
+      {
+        "threshold": 0.65,
+        "coverage": 0.5818181818181818,
+        "accuracy": 0.8018973214285714
+      },
+      {
+        "threshold": 0.7000000000000001,
+        "coverage": 0.5237012987012987,
+        "accuracy": 0.8276503409795413
+      },
+      {
+        "threshold": 0.75,
+        "coverage": 0.462987012987013,
+        "accuracy": 0.8492286115007013
+      },
+      {
+        "threshold": 0.8,
+        "coverage": 0.38701298701298703,
+        "accuracy": 0.8741610738255033
+      },
+      {
+        "threshold": 0.8500000000000001,
+        "coverage": 0.2902597402597403,
+        "accuracy": 0.901565995525727
+      },
+      {
+        "threshold": 0.9,
+        "coverage": 0.18571428571428572,
+        "accuracy": 0.9335664335664335
+      },
+      {
+        "threshold": 0.9500000000000001,
+        "coverage": 0.07532467532467532,
+        "accuracy": 0.978448275862069
+      },
+      {
+        "threshold": 1.0,
+        "coverage": 0.0,
+        "accuracy": null
+      }
+    ]
+  },
+  "latency_ms": {
+    "p50": 3684.3099849998,
+    "p95": 3703.6878930512103
+  },
+  "top_confused_pairs": [
+    {
+      "actual": "card_arrival",
+      "predicted": "card_delivery_estimate",
+      "count": 38,
+      "example_ids": [
+        "test-00000",
+        "test-00001",
+        "test-00002"
+      ]
+    },
+    {
+      "actual": "exchange_via_app",
+      "predicted": "exchange_rate",
+      "count": 32,
+      "example_ids": [
+        "test-00400",
+        "test-00401",
+        "test-00402"
+      ]
+    },
+    {
+      "actual": "getting_virtual_card",
+      "predicted": "get_disposable_virtual_card",
+      "count": 32,
+      "example_ids": [
+        "test-00920",
+        "test-00921",
+        "test-00922"
+      ]
+    },
+    {
+      "actual": "transfer_timing",
+      "predicted": "pending_transfer",
+      "count": 32,
+      "example_ids": [
+        "test-02040",
+        "test-02041",
+        "test-02042"
+      ]
+    },
+    {
+      "actual": "get_physical_card",
+      "predicted": "change_pin",
+      "count": 31,
+      "example_ids": [
+        "test-01240",
+        "test-01241",
+        "test-01245"
+      ]
+    },
+    {
+      "actual": "card_not_working",
+      "predicted": "card_payment_not_recognised",
+      "count": 30,
+      "example_ids": [
+        "test-00360",
+        "test-00361",
+        "test-00363"
+      ]
+    },
+    {
+      "actual": "why_verify_identity",
+      "predicted": "verify_my_identity",
+      "count": 27,
+      "example_ids": [
+        "test-01160",
+        "test-01162",
+        "test-01163"
+      ]
+    },
+    {
+      "actual": "top_up_failed",
+      "predicted": "pending_top_up",
+      "count": 25,
+      "example_ids": [
+        "test-02640",
+        "test-02642",
+        "test-02644"
+      ]
+    },
+    {
+      "actual": "transfer_not_received_by_recipient",
+      "predicted": "pending_transfer",
+      "count": 24,
+      "example_ids": [
+        "test-00840",
+        "test-00842",
+        "test-00843"
+      ]
+    },
+    {
+      "actual": "card_payment_not_recognised",
+      "predicted": "compromised_card",
+      "count": 23,
+      "example_ids": [
+        "test-01081",
+        "test-01082",
+        "test-01084"
+      ]
+    }
+  ],
+  "status": "measured",
+  "evaluation_recovery": {
+    "validation_rows_reused": 1000,
+    "test_rows_reused": 272,
+    "measurement_sessions": [
+      "14d2be239f944a63bbbaaf7fe99303e5",
+      "c85eb72a36be48c8806f0ba4daa13798"
+    ],
+    "timing_scope": "Observed batches on the declared GPU type; may span resumed sessions, not a single uninterrupted process"
+  },
+  "system": "zeroshot",
+  "adapter": null,
+  "adapter_fingerprint": null,
+  "case_sha256": "dff3dfd9f9690c1b07f18488247237e387a81cb54fc68f566d04ce319886ab92",
+  "temperature": 4,
+  "abstention_selection": {
+    "threshold": 0.8297390773496351,
+    "target_accuracy": 0.9,
+    "validation_coverage": 0.297,
+    "validation_selective_accuracy": 0.9023569023569024,
+    "selection": "Maximize validation coverage with >=30 accepted and target empirical accuracy; not a guarantee."
+  },
+  "hardware": {
+    "gpu": "Tesla T4",
+    "batch_size": 1
+  },
+  "scoring_backend": "local-awq",
+  "internal_query_microbatch": 1,
+  "candidate_label_batch": 77,
+  "candidate_cache_token_budget": 100000,
+  "tokens": {
+    "input_tokens": 1594209,
+    "output_tokens": 1188880
+  },
+  "elapsed_inference_seconds": 11288.319082077003,
+  "gpu_hourly_price_assumption": 0.0,
+  "cost_per_1000": 0.0,
+  "decoder": "normalized log-likelihood of all 77 complete label sequences including EOS; not one greedy generation"
+}

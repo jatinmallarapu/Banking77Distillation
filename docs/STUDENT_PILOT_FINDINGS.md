@@ -1,7 +1,7 @@
 # What the single-seed pilot actually showed
 
-These findings use all 3,080 official test queries. The teacher comparison and
-public release were still pending when this analysis was written. The machine-readable
+These findings use all 3,080 official test queries. Both public model artifacts
+have passed anonymous download and inference checks. The machine-readable
 sources are [Student A](../evals/results/student_a-seed1-batch1.json) and
 [Student B](../evals/results/student_b-seed1-batch1.json).
 
@@ -60,5 +60,9 @@ Student B remains useful as a reproducible distillation experiment, rather than
 an accuracy improvement claim. TF-IDF remains a credible CPU alternative when
 its lower measured accuracy is acceptable. CPU TF-IDF timings and GPU all-label
 likelihood timings are different execution scopes; their ratio is not a matched
-production serving speedup. Teacher results are needed before making the final
-teacher-versus-student quality and cost comparison.
+production serving speedup. The measured zero-shot 7B AWQ classifier reached 61.79% accuracy and 0.5968
+macro-F1 under the declared all-label likelihood protocol. This is not a universal
+claim about Qwen or a few-shot/chat-generation benchmark. The teacher used
+training-only retrieval examples when labeling paraphrases, whereas the zero-shot
+benchmark did not. An 80% augmentation keep rate and a 61.79% zero-shot test
+accuracy measure different tasks and must not be substituted for one another.
